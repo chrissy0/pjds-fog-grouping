@@ -1,4 +1,3 @@
-import uuid
 from flask import Flask, request
 import json
 from node import Node

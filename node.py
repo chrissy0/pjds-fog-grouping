@@ -1,6 +1,4 @@
 import uuid
-from flask import Flask, request
-import json
 
 
 class Node:
