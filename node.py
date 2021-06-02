@@ -11,6 +11,7 @@ class Node:
             "latitude": latitude,
             "longitude": longitude
         }
+        self.peers = []
 
 
     def update_location(self, latitude, longitude):
@@ -28,3 +29,6 @@ class Node:
             "ram_byte": self.ram_byte,
             "location": self.location
         }
+
+    def set_peers(self, peers):
+        self.peers = peers
