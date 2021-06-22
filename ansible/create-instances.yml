@@ -2,87 +2,22 @@
   hosts: localhost
   gather_facts: no
   vars:
-      gcp_project: pjds-fog-grouping
-      gcp_cred_kind: serviceaccount
-      gcp_cred_file: "{{ playbook_dir | dirname }}/credentials/pjds-fog-grouping-decc6537aeae.json"
-      zone: "europe-west3-c"
-      region: "europe-west3"
-      vm_name: "test-vm"
-
-  tasks:
-   - name: create a disk
-     gcp_compute_disk:
-         name: '{{ vm_name }}-disk-instance'
-         size_gb: 10
-         source_image: 'projects/ubuntu-os-cloud/global/images/family/ubuntu-2004-lts'
-         zone: "{{ zone }}"
-         project: "{{ gcp_project }}"
-         auth_kind: "{{ gcp_cred_kind }}"
-         service_account_file: "{{ gcp_cred_file }}"
-         scopes:
-           - https://www.googleapis.com/auth/compute
-         state: present
-     register: disk
-   - name: create a address
-     gcp_compute_address:
-         name: '{{ vm_name }}-address-instance'
-         region: "{{ region }}"
-         project: "{{ gcp_project }}"
-         auth_kind: "{{ gcp_cred_kind }}"
-         service_account_file: "{{ gcp_cred_file }}"
-         scopes:
-           - https://www.googleapis.com/auth/compute
-         state: present
-     register: address
-   - name: create a instance
-     gcp_compute_instance:
-         state: present
-         name: "{{ vm_name }}"
-         machine_type: n1-standard-1
-         disks:
-           - auto_delete: true
-             boot: true
-             source: "{{ disk }}"
-         network_interfaces:
-             - network: null # use default
-               access_configs:
-                 - name: 'External NAT'
-                   nat_ip: "{{ address }}"
-                   type: 'ONE_TO_ONE_NAT'
-         zone: "{{ zone }}"
-         project: "{{ gcp_project }}"
-         auth_kind: "{{ gcp_cred_kind }}"
-         service_account_file: "{{ gcp_cred_file }}"
-         scopes:
-           - https://www.googleapis.com/auth/compute
-         metadata: {"enable-oslogin": TRUE}
-     register: instance
-#   - name: create a firewall
-#     gcp_compute_firewall:
-#       name: nginx
-#       allowed:
-#         - ip_protocol: tcp
-#           ports:
-#             - '80'
-#       project: "{{ gcp_project }}"
-#       auth_kind: "{{ gcp_cred_kind }}"
-#       service_account_file: "{{ gcp_cred_file }}"
-#       state: present
-
-   - name: Wait for SSH to come up
-     wait_for: host={{ address.address }} port=22 delay=10 timeout=60
-
-   - name: Add host to groupname
-     add_host: hostname={{ address.address }} groupname=new_instances
-
+    gcp_project: pjds-fog-grouping
+    gcp_cred_kind: serviceaccount
+    gcp_cred_file: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
+    zone: "europe-west3-c"
+    region: "europe-west3"
+#    ansible_ssh_private_key_file: "{{ playbook_dir | dirname }}/credentials/ssh-key-ansible-sa"
+  roles:
+    - { role: create-instance, vm_names: [ vm-1 ] }
 
 - name: Manage new instances
+  hosts: all
   vars:
-      ansible_ssh_private_key_file: "{{ playbook_dir | dirname }}/credentials/ssh-key-ansible-sa"
-  hosts: new_instances
+    ansible_ssh_private_key_file: "{{ playbook_dir | dirname }}/credentials/ssh-key-ansible-sa"
+#    ansible_host_key_checking: false
   connection: ssh
   remote_user: sa_110764242531759494195
-#  private_key_file: "{{ playbook_dir | dirname }}/credentials/pjds-key-ecdsa"
   become: True
   roles:
-    - sqlite
+    - basic

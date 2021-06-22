@@ -1,0 +1,7 @@
+- name: Pull faasd
+  git:
+    repo: 'https://github.com/openfaas/faasd.git'
+    dest: /srv/faasd/
+
+- name: Install faasd
+  command: sh /srv/faasd/hack/install.sh

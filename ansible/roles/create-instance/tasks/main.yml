@@ -1,0 +1,3 @@
+- name: create all instances
+  include: create_instance.yml passed_vm_name="{{ item }}"
+  with_items: "{{ vm_names }}"

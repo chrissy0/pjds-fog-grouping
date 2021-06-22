@@ -1,0 +1,43 @@
+gcloud compute instances bulk create --name-pattern="pjds-vm-#" --region=europe-west3 --count=2
+gcloud compute instances list
+
+
+gcloud compute instances bulk create --name-pattern="pjds-vm-#" --zone=europe-west3-c --count=2 --custom-cpu=1 --custom-memory=1024MB
+
+https://stackoverflow.com/questions/51034454/how-to-make-ansible-dynamic-inventory-work-with-google-cloud-platform-google-co
+
+
+https://stackoverflow.com/questions/54757388/error-gcloud-services-enable-user-does-not-have-permission-to-access-project
+https://alex.dzyoba.com/blog/gcp-ansible-service-account/
+FOLLOW, but if it doesn't work change back to ansible service account and add ssh key again
+
+for role in \
+    'roles/compute.instanceAdmin' \
+    'roles/compute.instanceAdmin.v1' \
+    'roles/compute.osAdminLogin' \
+    'roles/iam.serviceAccountUser'
+do \
+    gcloud projects add-iam-policy-binding \
+        pjds-fog-grouping \
+        --member='serviceAccount:ansible-sa@pjds-fog-grouping.iam.gserviceaccount.com' \
+        --role="${role}"
+done
+
+gcloud iam service-accounts keys create \
+    gcp-key-ansible-sa.json \
+    --iam-account=ansible-sa@pjds-fog-grouping.iam.gserviceaccount.com
+
+
+gcloud auth activate-service-account \
+    --key-file=gcp-key-ansible-sa.json
+
+...
+
+gcloud iam service-accounts describe \
+    ansible-sa@pjds-fog-grouping.iam.gserviceaccount.com \
+    --format='value(uniqueId)'
+
+gcloud compute firewall-rules create nginx --allow tcp:80
+gcloud compute firewall-rules create faasd --allow tcp:8080
+
+https://blog.alexellis.io/faasd-for-lightweight-serverless/
