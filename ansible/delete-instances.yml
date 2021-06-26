@@ -5,7 +5,7 @@
     gcp_project: pjds-fog-grouping
     gcp_cred_kind: serviceaccount
     gcp_cred_file: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
-    zone: "europe-west3-c"
+    zone: "europe-west3-a"
     region: "europe-west3"
   roles:
     - { role: delete-instance, vm_names: [ vm-1 ] }

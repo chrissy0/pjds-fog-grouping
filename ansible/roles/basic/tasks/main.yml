@@ -5,3 +5,9 @@
 
 - name: Install faasd
   command: sh /srv/faasd/hack/install.sh
+
+- name: Restart faasd because of known bug
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: faasd
