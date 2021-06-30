@@ -39,5 +39,6 @@ gcloud iam service-accounts describe \
 
 gcloud compute firewall-rules create nginx --allow tcp:80
 gcloud compute firewall-rules create faasd --allow tcp:8080
+gcloud compute firewall-rules create sqlite --allow tcp:5000
 
 https://blog.alexellis.io/faasd-for-lightweight-serverless/

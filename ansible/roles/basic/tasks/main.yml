@@ -11,3 +11,17 @@
     state: restarted
     daemon_reload: yes
     name: faasd
+
+- name: Install sqlite3
+  apt:
+    name: sqlite3
+    state: present
+
+- pip:
+    name: flask
+
+- name: Copy sqlite wrapper
+  copy: src={{ playbook_dir | dirname }}/sqlite/sqlite_wrapper.py dest=/opt/sqlite_wrapper.py owner=sa_110764242531759494195 group=admin mode=755
+
+- name: Start python wrapper
+  command: python3 /opt/sqlite_wrapper.py

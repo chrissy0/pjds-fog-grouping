@@ -18,4 +18,6 @@
   remote_user: sa_110764242531759494195
   become: True
   roles:
+    - update
+    - python3
     - basic
