@@ -1,4 +1,4 @@
-- name: Create an instance
+- name: Delete instances
   hosts: localhost
   gather_facts: no
   vars:
@@ -8,4 +8,4 @@
     zone: "europe-west3-a"
     region: "europe-west3"
   roles:
-    - { role: delete-instance, vm_names: [ vm-1 ] }
+    - { role: delete-instance, vm_names: [ vm-1, vm-2, vm-3, vm-4, vm-5 ] }

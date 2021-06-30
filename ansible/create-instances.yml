@@ -1,4 +1,4 @@
-- name: Create an instance
+- name: Create instances
   hosts: localhost
   gather_facts: no
   vars:
