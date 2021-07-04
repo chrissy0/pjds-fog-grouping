@@ -99,6 +99,11 @@ def add_fn_endpoint():
     return 'Node updated'
 
 
+@app.route('/get-alternatives', methods=['POST'])
+def get_alternatives_endpoint():
+    return get_alternatives(connection, request.data)
+
+
 # ----------- SQLite operators (non-leaders) ----------------
 
 
@@ -190,7 +195,7 @@ def update_node(conn, node_info):
 
 def add_fn(conn, fn_node_info):
     """
-    ADD a function to a node
+    Add a function to a node
     :param conn: sqlite connection
     :param fn_node_info: function name and node address
     """
@@ -199,6 +204,23 @@ def add_fn(conn, fn_node_info):
     cur = conn.cursor()
     cur.execute(insert_query, fn_node_info)
     conn.commit()
+
+
+def get_alternatives(conn, fn):
+    """
+    Find all nodes where the given function is deployed
+    :param conn: sqlite connection
+    :param fn: function name
+    """
+
+    get_query = ''' SELECT address FROM grouping WHERE INSTR(functions, ?) IS NOT 0 '''
+    cur = conn.cursor()
+    cur.execute(get_query, (fn,))
+    fetched = cur.fetchall()
+    res = ''
+    for e in fetched:
+        res += e[0].decode('utf-8') + ','
+    return res[:-1]
 
 
 if __name__ == '__main__':
