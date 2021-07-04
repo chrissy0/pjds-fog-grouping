@@ -93,8 +93,8 @@ def update_node_endpoint():
     return 'Node updated'
 
 
-@app.route('/add-fn-to-node', methods=['POST'])
-def add_fn_to_node_endpoint():
+@app.route('/add-fn', methods=['POST'])
+def add_fn_endpoint():
     add_fn(connection, (request.data.split(b',')))
     return 'Node updated'
 
