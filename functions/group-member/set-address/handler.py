@@ -2,7 +2,7 @@ import requests
 import json
 import os
 import sys
-from member_template import get_external_ip
+from member_utility import get_external_ip
 
 port = "5000"
 
@@ -13,7 +13,7 @@ def handle(req):
     except:
         return json.dumps({
             "status-code": 500,
-            "message": "Error while retrieving external IP from environment variable in group member. Make sure it was set during function deployment."
+            "message": f"Error while retrieving external IP from environment variable in group member. Make sure it was set during function deployment."
         })
 
     payload = json.loads(req)
