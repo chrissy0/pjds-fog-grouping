@@ -104,6 +104,11 @@ def get_alternatives_endpoint():
     return get_alternatives(connection, request.data)
 
 
+@app.route('/get-all-nodes', methods=['GET'])
+def get_all_nodes_endpoint():
+    return get_all_nodes(connection)
+
+
 # ----------- SQLite operators (non-leaders) ----------------
 
 
@@ -231,6 +236,20 @@ def delete_node(conn, node):
     """
 
 
+def get_all_nodes(conn):
+    """
+    Retrieve all nodes inside the group
+    :param conn: sqlite connection
+    """
+
+    get_query = ''' SELECT address FROM grouping '''
+    cur = conn.cursor()
+    cur.execute(get_query)
+    fetched = cur.fetchall()
+    res = ''
+    for e in fetched:
+        res += e[0].decode('utf-8') + ','
+    return res[:-1]
 
 
 if __name__ == '__main__':
