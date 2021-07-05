@@ -8,7 +8,42 @@ database = "addresses.db"
 connection = None
 
 
-# ------------- API endpoints -----------------
+def create_connection(db_file):
+    """ create a database connection to the SQLite database
+        specified by db_file
+    :param db_file: database file
+    :return: Connection object or None
+    """
+
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+    except Error as e:
+        print(e)
+
+    return conn
+
+
+def create_tables(conn):
+    """ create needed tables if they do not exist
+    :param conn: sqlite connection
+    """
+
+    # Creates the table where non-leader nodes store the address of the next function
+    create_addresses_table = ''' CREATE TABLE IF NOT EXISTS addresses(function TEXT, address TEXT); '''
+    # Creates the table where non-leader nodes store the leader address of their group
+    create_leader_table = ''' CREATE TABLE IF NOT EXISTS leaders(address TEXT) '''
+
+    # Creates the table where leader nodes store information about nodes in their group
+    create_grouping_info_table = ''' CREATE TABLE IF NOT EXISTS grouping(address TEXT, cpu TEXT, memory TEXT, functions TEXT) '''
+
+    try:
+        c = conn.cursor()
+        c.execute(create_addresses_table)
+        c.execute(create_leader_table)
+        c.execute(create_grouping_info_table)
+    except Error as e:
+        print(e)
 
 
 @app.before_first_request
@@ -16,6 +51,9 @@ def before_first_request():
     global connection
     connection = create_connection(database)
     create_tables(connection)
+
+
+# ----------- API endpoints (non-leaders) -----------------------
 
 
 @app.route('/set-address', methods=['POST'])
@@ -40,44 +78,42 @@ def get_leader_address_endpoint():
     return get_leader_address(connection)
 
 
-# ----------- SQLite operators -------------------
+# ----------- API endpoints (leaders) -----------------------
 
 
-def create_connection(db_file):
-    """ create a database connection to the SQLite database
-        specified by db_file
-    :param db_file: database file
-    :return: Connection object or None
-    """
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-    except Error as e:
-        print(e)
-
-    return conn
+@app.route('/add-node', methods=['POST'])
+def add_node_endpoint():
+    add_node(connection, (request.data.split(b',')))
+    return 'New node added'
 
 
-def create_tables(conn):
-    """ create needed tables if they do not exist
-    :param conn: sqlite connection
-    """
-    create_addresses_table = ''' CREATE TABLE IF NOT EXISTS addresses(function TEXT, address TEXT); '''
-    create_leader_table = ''' CREATE TABLE IF NOT EXISTS leaders(address TEXT) '''
-    try:
-        c = conn.cursor()
-        c.execute(create_addresses_table)
-        c.execute(create_leader_table)
-    except Error as e:
-        print(e)
+@app.route('/update-node', methods=['POST'])
+def update_node_endpoint():
+    update_node(connection, (request.data.split(b',')))
+    return 'Node updated'
+
+
+@app.route('/add-fn', methods=['POST'])
+def add_fn_endpoint():
+    add_fn(connection, (request.data.split(b',')))
+    return 'Node updated'
+
+
+@app.route('/get-alternatives', methods=['POST'])
+def get_alternatives_endpoint():
+    return get_alternatives(connection, request.data)
+
+
+# ----------- SQLite operators (non-leaders) ----------------
 
 
 def set_address(conn, data):
     """
-    Delete old address (if exists) and set a new one
+    Delete old address (if exists) and set a new one for given function
     :param conn: sqlite connection
     :param data: function name + the address where the function is deployed
     """
+
     delete_query = ''' DELETE FROM addresses WHERE function=? '''
     insert_query = ''' INSERT INTO addresses(function, address) VALUES(?, ?) '''
     cur = conn.cursor()
@@ -92,7 +128,8 @@ def get_address(conn, function_name):
     :param conn: sqlite connection
     :param function_name: function name to be queried
     """
-    get_query = ''' SELECT address FROM addresses WHERE function=? LIMIT 1 '''
+
+    get_query = ''' SELECT address FROM addresses WHERE function=? '''
     cur = conn.cursor()
     cur.execute(get_query, (function_name,))
     res = cur.fetchall()
@@ -105,6 +142,7 @@ def set_leader_address(conn, address):
     :param conn: sqlite connection
     :param address: leader address
     """
+
     delete_query = ''' DELETE FROM leaders '''
     insert_query = ''' INSERT INTO leaders(address) VALUES(?) '''
     cur = conn.cursor()
@@ -118,11 +156,81 @@ def get_leader_address(conn):
     Retrieve leader address (currently only one saved)
     :param conn: sqlite connection
     """
-    get_query = ''' SELECT * FROM leaders LIMIT 1 '''
+
+    get_query = ''' SELECT * FROM leaders '''
     cur = conn.cursor()
     cur.execute(get_query)
     res = cur.fetchall()
     return res[0][0]
+
+
+# ----------- SQLite operators (leaders) ----------------
+
+
+def add_node(conn, node):
+    """
+    Add a node to the leader
+    :param conn: sqlite connection
+    :param node: node information
+    """
+
+    insert_query = ''' INSERT INTO grouping(address, cpu, memory) VALUES(?, ?, ?)'''
+    cur = conn.cursor()
+    cur.execute(insert_query, node)
+    conn.commit()
+
+
+def update_node(conn, node_info):
+    """
+    Update a nodes information such as cpu and memory usage
+    :param conn: sqlite connection
+    :param node_info: new node information
+    """
+
+    update_query = ''' UPDATE grouping SET cpu=?, memory=? WHERE address=? '''
+    cur = conn.cursor()
+    cur.execute(update_query, (node_info[1], node_info[2], node_info[0]))
+    conn.commit()
+
+
+def add_fn(conn, fn_node_info):
+    """
+    Add a function to a node
+    :param conn: sqlite connection
+    :param fn_node_info: function name and node address
+    """
+
+    insert_query = ''' UPDATE grouping SET functions=IFNULL(functions, '') || ? || ',' WHERE address=? '''
+    cur = conn.cursor()
+    cur.execute(insert_query, fn_node_info)
+    conn.commit()
+
+
+def get_alternatives(conn, fn):
+    """
+    Find all nodes where the given function is deployed
+    :param conn: sqlite connection
+    :param fn: function name
+    """
+
+    get_query = ''' SELECT address FROM grouping WHERE INSTR(functions, ?) IS NOT 0 '''
+    cur = conn.cursor()
+    cur.execute(get_query, (fn,))
+    fetched = cur.fetchall()
+    res = ''
+    for e in fetched:
+        res += e[0].decode('utf-8') + ','
+    return res[:-1]
+
+
+def delete_node(conn, node):
+    """
+    TODO: Check if node is reachable. If not, delete it from database
+    :param conn: sqlite connection
+    :param node: inactive node
+    """
+
+
 
 
 if __name__ == '__main__':
