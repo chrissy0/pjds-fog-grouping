@@ -223,5 +223,15 @@ def get_alternatives(conn, fn):
     return res[:-1]
 
 
+def delete_node(conn, node):
+    """
+    TODO: Check if node is reachable. If not, delete it from database
+    :param conn: sqlite connection
+    :param node: inactive node
+    """
+
+
+
+
 if __name__ == '__main__':
     app.run()
