@@ -1,4 +1,4 @@
-# V1.1 2021.07.05 19:17
+# V1.2 2021.07.06 20:19
 
 import requests
 import json
@@ -26,14 +26,15 @@ def get_function_ip(external_ip, function_name):
         raise RuntimeError(error_msg)
 
 
-def __call_fn(external_ip, function_name, data):
-    try:
-        response = requests.get(f"http://{external_ip}:{faasd_port}/function/{function_name}", data=data)
-        if response.status_code != 200:
-            raise RuntimeError
-        return response
-    except:
-        raise RuntimeError(error_msg)
+def __call_fn(function_ip, function_name, data):
+    error_msg = f"Could not access function {function_name} at {function_ip}:{faasd_port}."
+    # try:
+    response = requests.get(f"http://{function_ip}:{faasd_port}/function/{function_name}", data=data)
+    # if response.status_code != 200:
+    #     raise RuntimeError(error_msg)
+    return response.content.decode("utf-8")
+    # except e:
+    #     raise RuntimeError(error_msg, e)
 
 
 def call_fn(function_name, data):
@@ -41,6 +42,6 @@ def call_fn(function_name, data):
     function_ip = get_function_ip(external_ip, function_name)
     # TODO uncomment when there are dummy functions
     # TODO try calling multiple times, then request alternative from leader if necessary
-    # __call_fn(function_ip, function_name, data)
-    return function_ip
+    response = __call_fn(function_ip, function_name, data)
+    return response
 
