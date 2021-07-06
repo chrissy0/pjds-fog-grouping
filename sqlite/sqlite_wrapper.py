@@ -133,7 +133,6 @@ def get_address(conn, function_name):
     :param conn: sqlite connection
     :param function_name: function name to be queried
     """
-    print(function_name)
     get_query = ''' SELECT address FROM addresses WHERE function=? '''
     cur = conn.cursor()
     cur.execute(get_query, (function_name,))
@@ -168,6 +167,8 @@ def get_leader_address(conn):
     cur = conn.cursor()
     cur.execute(get_query)
     res = cur.fetchall()
+    if len(res) == 0:
+        return ''
     return res[0][0]
 
 
