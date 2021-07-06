@@ -6,5 +6,5 @@ functions:
   set-address:
     lang: python3
     handler: ./set-address
-    image: chrissy0/set-address:latest
+    image: pjdsgrouping/set-address:latest
 
