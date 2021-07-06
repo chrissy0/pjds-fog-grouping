@@ -35,7 +35,7 @@ def create_tables(conn):
     create_leader_table = ''' CREATE TABLE IF NOT EXISTS leaders(address TEXT) '''
 
     # Creates the table where leader nodes store information about nodes in their group
-    create_grouping_info_table = ''' CREATE TABLE IF NOT EXISTS grouping(address TEXT, cpu TEXT, memory TEXT, functions TEXT) '''
+    create_grouping_info_table = ''' CREATE TABLE IF NOT EXISTS grouping(address TEXT, cpu TEXT, memory TEXT, functions TEXT, secret TEXT) '''
 
     try:
         c = conn.cursor()
@@ -179,7 +179,7 @@ def add_node(conn, node):
     :param node: node information
     """
 
-    insert_query = ''' INSERT INTO grouping(address, cpu, memory) VALUES(?, ?, ?)'''
+    insert_query = ''' INSERT INTO grouping(address, cpu, memory, secret) VALUES(?, ?, ?, ?)'''
     cur = conn.cursor()
     cur.execute(insert_query, node)
     conn.commit()
