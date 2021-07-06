@@ -1,4 +1,4 @@
-# V1.2 2021.07.06 20:19
+# V1.2.1 2021.07.06 20:48
 
 import requests
 import json
@@ -27,14 +27,8 @@ def get_function_ip(external_ip, function_name):
 
 
 def __call_fn(function_ip, function_name, data):
-    error_msg = f"Could not access function {function_name} at {function_ip}:{faasd_port}."
-    # try:
     response = requests.get(f"http://{function_ip}:{faasd_port}/function/{function_name}", data=data)
-    # if response.status_code != 200:
-    #     raise RuntimeError(error_msg)
     return response.content.decode("utf-8")
-    # except e:
-    #     raise RuntimeError(error_msg, e)
 
 
 def call_fn(function_name, data):
