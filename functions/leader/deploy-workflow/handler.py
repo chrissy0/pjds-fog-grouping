@@ -28,9 +28,9 @@ def handle(req):
         })
 
     nodes = res.text.split(",")
-   
+
     # TODO: Insert Load Analysis, get nodes ordered by available CPU/RAM
- 
+
     # TODO: workflow
 
     # function-deployment
@@ -40,7 +40,7 @@ def handle(req):
         node_secret = nodes[i-1].split()[1]
 
         node_address = f"http://admin:{node_secret}@{node_ip}:8080"
-        url = node_address + "/system/functions" 
+        url = node_address + "/system/functions"
 
         headers = {
             'Content-Type': 'application/json'
@@ -57,7 +57,7 @@ def handle(req):
                 "message": f"Problem with deletion of {func}",
                 "error-message": response.text
             })
-        
+
         # Deploy Function
         payload = json.dumps({
             "service": func,
@@ -65,7 +65,7 @@ def handle(req):
             "image": rep,
             "readOnlyRootFilesystem": True
         })
-       
+
         response = requests.request("POST", url, headers=headers, data=payload)
         if response.status_code != 200:
             return json.dumps({
@@ -82,7 +82,7 @@ def handle(req):
                 "message": f"Could not store function {func} in database"
             })
 
-        # Save information about next function: 
+        # Save information about next function:
         next_node = nodes[i-1].split()[0]
         res = requests.post(f"http://{node_ip}:{port}/set-address", data=f"{func},{next_node}")
         if res.status_code != 200:
@@ -90,5 +90,6 @@ def handle(req):
                 "status-code": res.status_code,
                 "message": f"Address {next_node} for function {func} could not be set on node at {node_ip}:{port}."
             })
-        
+
+
     return "Deployed new workflow"
