@@ -242,13 +242,13 @@ def get_all_nodes(conn):
     :param conn: sqlite connection
     """
 
-    get_query = ''' SELECT address FROM grouping '''
+    get_query = ''' SELECT address, secret FROM grouping '''
     cur = conn.cursor()
     cur.execute(get_query)
     fetched = cur.fetchall()
     res = ''
     for e in fetched:
-        res += e[0].decode('utf-8') + ','
+        res += e[0].decode('utf-8') + ' ' + e[1].decode('utf-8') + ','
     return res[:-1]
 
 
