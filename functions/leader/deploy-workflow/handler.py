@@ -63,7 +63,10 @@ def handle(req):
             "service": func,
             "network": "func_functions",
             "image": rep,
-            "readOnlyRootFilesystem": True
+            "readOnlyRootFilesystem": True,
+            "envVars": {
+                "externalIp": node_ip
+            }
         })
 
         response = requests.request("POST", url, headers=headers, data=payload)
