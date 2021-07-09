@@ -6,13 +6,14 @@ from member_utility import get_external_ip
 
 port = "5000"
 
+
 def handle(req):
     body = json.loads(req)
     workflow = body["workflow"]
     functions = body["functions"]
 
     try:
-        ip = get_external_ip()
+        external_ip = get_external_ip()
     except:
         return json.dumps({
             "status-code": 500,
@@ -20,26 +21,37 @@ def handle(req):
         })
 
     # Get Group members:
-    res = requests.get(f"http://{ip}:{port}/get-all-nodes")
+    res = requests.get(f"http://{external_ip}:{port}/get-all-nodes")
     if res.status_code != 200:
         return json.dumps({
             "status-code": res.status_code,
-            "message": f"There was an error while retrieving group members for the leader with {ip}"
+            "message": f"There was an error while retrieving group members for the leader with {external_ip}"
         })
 
     nodes = res.text.split(",")
+
+    # Turning "a->b->c" into [("a", "b"), ("b", "c"), ("c", None)]. The last element is needed so "c" is still deployed.
+    function_dependencies = []
+    functions_chain = workflow.split("->")
+    for i in range(len(functions_chain) - 1):
+        function_dependencies.append((functions_chain[i], functions_chain[i+1]))
+    function_dependencies.append((functions_chain[-1], None))
 
     # TODO: Insert Load Analysis, get nodes ordered by available CPU/RAM
 
     # TODO: workflow
 
-    # function-deployment
-    for i, (func, rep) in enumerate(functions.items()):
 
-        node_ip = nodes[i-1].split()[0]
-        node_secret = nodes[i-1].split()[1]
+    for i, (source_func, target_func) in enumerate(function_dependencies):
+        # Modulo % so we don't exceed number of nodes. Wraps around!
+        source_node = nodes[i % len(nodes)]
+        source_node_ip = source_node.split()[0]
+        source_node_secret = source_node.split()[1]
+        # Modulo % so we don't exceed number of nodes. Wraps around!
+        target_node = nodes[(i+1) % len(nodes)]
+        target_node_ip = target_node.split()[0]
 
-        node_address = f"http://admin:{node_secret}@{node_ip}:8080"
+        node_address = f"http://admin:{source_node_secret}@{source_node_ip}:8080"
         url = node_address + "/system/functions"
 
         headers = {
@@ -48,7 +60,7 @@ def handle(req):
 
         # First delete function if already exists
         payload = json.dumps({
-            "functionName": func
+            "functionName": source_func
         })
         response = requests.request("DELETE", url, headers=headers, data=payload)
         if response.status_code != 200 and response.status_code != 404:
@@ -59,13 +71,14 @@ def handle(req):
             })
 
         # Deploy Function
+        source_func_rep = functions[source_func]
         payload = json.dumps({
-            "service": func,
+            "service": source_func,
             "network": "func_functions",
-            "image": rep,
+            "image": source_func_rep,
             "readOnlyRootFilesystem": True,
             "envVars": {
-                "externalIp": node_ip
+                "externalIp": source_node_ip
             }
         })
 
@@ -73,26 +86,27 @@ def handle(req):
         if response.status_code != 200:
             return json.dumps({
                 "status-code": res.status_code,
-                "message": f"Could not deploy function {func}",
+                "message": f"Could not deploy function {source_func}",
                 "error-message": response.text
             })
 
         # Store Function in SQLite
-        res = requests.post(f"http://{ip}:{port}/add-fn", data=f"{func},{node_address}")
+        res = requests.post(f"http://{external_ip}:{port}/add-fn", data=f"{source_func},{source_node_ip}")
         if res.status_code != 200:
             return json.dumps({
                 "status-code": res.status_code,
-                "message": f"Could not store function {func} in database"
+                "message": f"Could not store function {source_func} in database"
             })
 
         # Save information about next function:
-        next_node = nodes[i-1].split()[0]
-        res = requests.post(f"http://{node_ip}:{port}/set-address", data=f"{func},{next_node}")
-        if res.status_code != 200:
-            return json.dumps({
-                "status-code": res.status_code,
-                "message": f"Address {next_node} for function {func} could not be set on node at {node_ip}:{port}."
-            })
+        if target_func is not None:
+            res = requests.post(f"http://{source_node_ip}:{port}/set-address", data=f"{target_func},{target_node_ip}")
+            if res.status_code != 200:
+                return json.dumps({
+                    "status-code": res.status_code,
+                    "message": f"Address {target_node_ip} for function {target_func} could not be set on node at {source_node_ip}:{port}."
+                })
 
 
     return "Deployed new workflow"
+
