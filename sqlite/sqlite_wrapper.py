@@ -226,6 +226,8 @@ def get_alternatives(conn, fn):
     cur.execute(get_query, (fn,))
     fetched = cur.fetchall()
     res = ''
+    if len(fetched) == 0:
+        return res
     for e in fetched:
         res += e[0].decode('utf-8') + ','
     return res[:-1]
