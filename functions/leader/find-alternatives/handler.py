@@ -5,6 +5,7 @@ from member_utility import get_external_ip
 port = "5000"
 
 """
+Request body example:
 {
     "requester" : <node-address that is requesting the alternative>
     "function" : <the function that needs to be looked up for alternatives>
