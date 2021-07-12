@@ -22,13 +22,14 @@ def handle(req):
 
     ip = get_external_ip()
 
-    res = requests.get(f"http://{ip}:{port}/get-alternatives")
+    res = requests.post(f"http://{ip}:{port}/get-alternatives", data=function)
     addresses = res.text.split(",")
     alternative = ''
 
     # For now, simple approach: Take the first alternative address in the list
     # Later on, pick a node with minimal memory/cpu usage
     for alt in addresses:
+        alt = alt.strip()
         if alt != address:
             res = requests.post(f"http://{requester}:{port}/set-address", data=f"{function},{alt}")
             if res.status_code == 200:

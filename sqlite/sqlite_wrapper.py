@@ -227,9 +227,11 @@ def get_alternatives(conn, fn):
     :param fn: function name
     """
 
-    get_query = ''' SELECT address FROM grouping WHERE INSTR(functions, ?) IS NOT 0 '''
+    encoding = "utf-8"
+    get_query = f"SELECT address FROM grouping WHERE functions LIKE '%{fn.decode(encoding)},%'"
+    print(get_query)
     cur = conn.cursor()
-    cur.execute(get_query, (fn,))
+    cur.execute(get_query)
     fetched = cur.fetchall()
     res = ''
     if len(fetched) == 0:
