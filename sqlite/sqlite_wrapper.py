@@ -214,7 +214,8 @@ def add_fn(conn, fn_node_info):
     :param fn_node_info: function name and node address
     """
 
-    insert_query = ''' UPDATE grouping SET functions=IFNULL(functions, ',') || ? || ',' WHERE address=? '''
+    insert_query = ''' UPDATE grouping SET functions=IFNULL(functions, ',') || ? || ',' WHERE address=? AND functions NOT LIKE '%,' || ? || ',%' '''
+    fn_node_info.append(fn_node_info[0])
     cur = conn.cursor()
     cur.execute(insert_query, fn_node_info)
     conn.commit()
