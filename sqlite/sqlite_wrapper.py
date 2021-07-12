@@ -109,6 +109,12 @@ def get_all_nodes_endpoint():
     return get_all_nodes(connection)
 
 
+@app.route('/delete-node', methods=['POST'])
+def delete_node_endpoint():
+    delete_node(connection, request.data)
+    return f'{request.data} deleted'
+
+
 # ----------- SQLite operators (non-leaders) ----------------
 
 
@@ -233,12 +239,26 @@ def get_alternatives(conn, fn):
     return res[:-1]
 
 
+def delete_function(conn, data):
+    """
+
+    :param conn: sqlite connection
+    :param data: failed node address and it's function
+    :return:
+    """
+
+
 def delete_node(conn, node):
     """
     TODO: Check if node is reachable. If not, delete it from database
     :param conn: sqlite connection
     :param node: inactive node
     """
+
+    delete_query = ''' DELETE FROM grouping WHERE address=? '''
+    cur = conn.cursor()
+    cur.execute(delete_query, (node,))
+    conn.commit()
 
 
 def get_all_nodes(conn):
@@ -247,13 +267,16 @@ def get_all_nodes(conn):
     :param conn: sqlite connection
     """
 
-    get_query = ''' SELECT address, secret FROM grouping '''
+    get_query = ''' SELECT address, cpu, memory, secret FROM grouping '''
     cur = conn.cursor()
     cur.execute(get_query)
     fetched = cur.fetchall()
     res = ''
-    for e in fetched:
-        res += e[0].decode('utf-8') + ' ' + e[1].decode('utf-8') + ','
+    for entry in fetched:
+        for element in entry:
+            res += element.decode('utf-8') + ' '
+        res = res[:-1]
+        res += ','
     return res[:-1]
 
 
