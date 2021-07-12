@@ -214,7 +214,7 @@ def add_fn(conn, fn_node_info):
     :param fn_node_info: function name and node address
     """
 
-    insert_query = ''' UPDATE grouping SET functions=IFNULL(functions, '') || ? || ',' WHERE address=? '''
+    insert_query = ''' UPDATE grouping SET functions=IFNULL(functions, ',') || ? || ',' WHERE address=? '''
     cur = conn.cursor()
     cur.execute(insert_query, fn_node_info)
     conn.commit()
@@ -227,11 +227,9 @@ def get_alternatives(conn, fn):
     :param fn: function name
     """
 
-    encoding = "utf-8"
-    get_query = f"SELECT address FROM grouping WHERE functions LIKE '%{fn.decode(encoding)},%'"
-    print(get_query)
+    get_query = ''' SELECT address FROM grouping WHERE functions LIKE '%,' || ? || ',%' '''
     cur = conn.cursor()
-    cur.execute(get_query)
+    cur.execute(get_query, (fn,))
     fetched = cur.fetchall()
     res = ''
     if len(fetched) == 0:
