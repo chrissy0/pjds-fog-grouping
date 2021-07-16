@@ -1,6 +1,5 @@
-from member_utility import call_fn
+from eval_util import call_and_log
 
 
 def handle(req):
-    # passes data to next function
-    return call_fn("evaluation-function-06", req)
+    return call_and_log("evaluation-function-05", ["evaluation-function-06"], False, req)

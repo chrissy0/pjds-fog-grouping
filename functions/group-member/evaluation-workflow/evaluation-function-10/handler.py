@@ -1,11 +1,5 @@
-from member_utility import call_fn
+from eval_util import call_and_log
 
 
 def handle(req):
-    # TODO change what this function does
-    payload = json.loads(req)
-    data = payload["data"]
-    return json.dumps({
-        "status-code": 200,
-        "message": f"Hello world! I have received this data: {data}."
-    })
+    return call_and_log("evaluation-function-10", [], False, req)

@@ -1,8 +1,5 @@
-from member_utility import call_fn
+from eval_util import call_and_log
 
 
 def handle(req):
-    # passes data to next function
-    # TODO do something with data and pass to other function
-    call_fn("evaluation-function-02", req)
-    return call_fn("evaluation-function-11", req)
+    return call_and_log("evaluation-function-01", ["evaluation-function-02", "evaluation-function-11"], True, req)
