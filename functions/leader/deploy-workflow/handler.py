@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import sys
+import random
 from member_utility import get_external_ip
 
 port = "5000"
@@ -38,14 +39,28 @@ def handle(req):
 
     # TODO: leave out nodes below certain threshold?
 
+    # Deployment modes
+    try:
+        deployment_mode = body["deployment-mode"]
+    except:
+        deployment_mode = "default"
+
+
+    try:
+        group_size = int(body["group-size"])
+    except:
+        group_size = 1
+
+
     for i in range(replicas):
-        deploy_function(nodes, body, external_ip, i)
+        deploy_function(deployment_mode, nodes, body, external_ip, i, None, group_size)
+
 
 
     return "Deployed new workflow"
 
 
-def deploy_function(nodes, body, external_ip, i, previous=None):
+def deploy_function(deployment_mode, nodes, body, external_ip, i, previous=None, grp_size=1, grp_i=0):
     try:
         name = body["name"]
     except:
@@ -65,7 +80,16 @@ def deploy_function(nodes, body, external_ip, i, previous=None):
     except:
         calls = None
 
-    node = nodes[ i % len(nodes) ]
+    if deployment_mode == "random":
+        node = random.choice(nodes)
+    elif deployment_mode == "single-node":
+        node = nodes[i]
+    elif deployment_mode == "grouped":
+        grp_i += 1 if i % grp_size == 0 else grp_i
+        node = nodes[ (grp_i -1) % len(nodes)]
+    else:
+        node = nodes[ i % len(nodes) ]
+
     node_ip = node[0]
     node_secret = node[3]
 
@@ -86,18 +110,6 @@ def deploy_function(nodes, body, external_ip, i, previous=None):
         'Content-Type': 'application/json'
     }
 
-    # First delete function if already exists
-    payload = json.dumps({
-        "functionName": name
-    })
-    response = requests.request("DELETE", url, headers=headers, data=payload)
-    if response.status_code != 200 and response.status_code != 404:
-        return json.dumps({
-            "status-code": res.status_code,
-            "message": f"Problem with deletion of {name}",
-            "error-message": response.text
-        })
-
     # Deploy Function
     payload = json.dumps({
         "service": name,
@@ -110,6 +122,10 @@ def deploy_function(nodes, body, external_ip, i, previous=None):
     })
 
     response = requests.request("POST", url, headers=headers, data=payload)
+    # Use Put if function is already deployed to update
+    if response.status_code == 400:
+        response = requests.request("PUT", url, headers=headers, data=payload)
+
     if response.status_code != 200:
         return json.dumps({
             "status-code": response.status_code,
@@ -127,9 +143,10 @@ def deploy_function(nodes, body, external_ip, i, previous=None):
 
     if calls is not None:
         for call in calls:
-            i += 1
-            deploy_function(nodes, call, external_ip, i, node_ip)
+            i += 1 if deployment_mode != "single-node" else i
+            deploy_function(deployment_mode, nodes, call, external_ip, i, node_ip, grp_i, grp_size)
     else:
         return "Calls is empty"
+
 
     return "Finished Internal Call"
