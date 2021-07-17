@@ -78,6 +78,11 @@ def get_leader_address_endpoint():
     return get_leader_address(connection)
 
 
+@app.route('/empty-all-tables', methods=['POST'])
+def empty_all_tables_endpoint():
+    return empty_all_tables(connection)
+
+
 # ----------- API endpoints (leaders) -----------------------
 
 
@@ -176,6 +181,22 @@ def get_leader_address(conn):
     if len(res) == 0:
         return ''
     return res[0][0]
+
+
+def empty_all_tables(conn):
+    """
+    Emptying all tables
+    :param conn: sqlite connection
+    """
+
+    delete_query_1 = ''' DELETE FROM addresses '''
+    delete_query_2 = ''' DELETE FROM grouping '''
+    delete_query_3 = ''' DELETE FROM leaders '''
+    cur = conn.cursor()
+    cur.execute(delete_query_1)
+    cur.execute(delete_query_2)
+    cur.execute(delete_query_3)
+    conn.commit()
 
 
 # ----------- SQLite operators (leaders) ----------------
