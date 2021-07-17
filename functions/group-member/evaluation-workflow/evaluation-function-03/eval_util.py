@@ -31,10 +31,8 @@ def cpu_stress(seconds):
 
     while True:
         # TODO find better way to produce load. Importing numpy produced error during compilation (bc. of base image? https://stackoverflow.com/questions/55032695/docker-build-for-numpy-pandas-giving-error)
-        print("#" * 10_000)
+        x = 52389756298372384569823756/328643428847562348975*2634856239452634
 
         current = time.perf_counter()
         if current - start >= seconds:
-            print(current-start)
             break
-
