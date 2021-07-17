@@ -96,7 +96,7 @@ def update_node_endpoint():
 @app.route('/add-fn', methods=['POST'])
 def add_fn_endpoint():
     add_fn(connection, (request.data.split(b',')))
-    return 'Node updated'
+    return 'Function added'
 
 
 @app.route('/get-alternatives', methods=['POST'])
@@ -188,7 +188,7 @@ def add_node(conn, node):
     :param node: node information
     """
 
-    insert_query = ''' INSERT OR IGNORE INTO grouping(address, cpu, memory, secret) VALUES(?, ?, ?, ?)'''
+    insert_query = ''' INSERT OR IGNORE INTO grouping(address, cpu, memory, secret, functions) VALUES(?, ?, ?, ?,',') '''
     cur = conn.cursor()
     cur.execute(insert_query, node)
     conn.commit()
@@ -214,7 +214,7 @@ def add_fn(conn, fn_node_info):
     :param fn_node_info: function name and node address
     """
 
-    insert_query = ''' UPDATE grouping SET functions=IFNULL(functions, ',') || ? || ',' WHERE address=? AND functions NOT LIKE '%,' || ? || ',%' '''
+    insert_query = ''' UPDATE grouping SET functions=functions || ? || ',' WHERE address=? AND functions NOT LIKE '%,' || ? || ',%' '''
     fn_node_info.append(fn_node_info[0])
     cur = conn.cursor()
     cur.execute(insert_query, fn_node_info)
@@ -251,7 +251,6 @@ def delete_function(conn, data):
 
 def delete_node(conn, node):
     """
-    TODO: Check if node is reachable. If not, delete it from database
     :param conn: sqlite connection
     :param node: inactive node
     """
