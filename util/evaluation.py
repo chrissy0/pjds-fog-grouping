@@ -27,13 +27,14 @@ def call_fn(fn_name, data, log=False):
     response = requests.get(f"http://{ip}:8080/function/{fn_name}", data=json.dumps(data))
     if log:
         print(response.content.decode("utf-8"))
+    return response.status_code == 200
 
 
 test_results = []
 
 group_modes = ["grouped", "random"]
 group_sizes = range(1, 2+1)
-durations = [0, 0.25, 0.5, 1]
+durations = [0, 0.25, 0.5, 1, 2, 5, 10, 15, 20, 25]
 iterations = 10
 
 for group_mode in group_modes:
@@ -60,6 +61,7 @@ for group_mode in group_modes:
             test_results[-1]["group_sizes"][-1]["durations"].append({})
             test_results[-1]["group_sizes"][-1]["durations"][-1]["duration"] = duration
             test_results[-1]["group_sizes"][-1]["durations"][-1]["measurements"] = []
+            test_results[-1]["group_sizes"][-1]["durations"][-1]["non-200-response-on-iteration"] = []
 
             print(f"Duration: {duration}")
             data = {
@@ -69,9 +71,11 @@ for group_mode in group_modes:
             for i in range(iterations):
                 print(f"#{i+1}")
                 start = timer()
-                call_fn("evaluation-function-11", data)
+                successful = call_fn("evaluation-function-11", data)
                 end = timer()
                 print(end - start)
                 test_results[-1]["group_sizes"][-1]["durations"][-1]["measurements"].append(end - start)
+                if not successful:
+                    test_results[-1]["group_sizes"][-1]["durations"][-1]["non-200-response-on-iteration"].append(i + 1)
 
 pickle.dump(test_results, open(f"test_results_{dt.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.p", "wb"))
