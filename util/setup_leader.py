@@ -2,6 +2,7 @@ import requests
 import json
 from node_data import leader_ip, leader_secret, group_nodes
 
+
 def setup_leader():
     # add nodes to leader
     for group_node in group_nodes():
@@ -27,4 +28,8 @@ def setup_leader():
     if response.status_code != 200:
         print("Couldn't deploy \"deploy-workflow\" function.")
 
-    # TODO set leader IP on nodes
+
+if __name__ == "__main__":
+    setup_leader()
+
+# TODO set leader IP on nodes

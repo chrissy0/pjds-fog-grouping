@@ -1,4 +1,5 @@
 import pickle
+import json
 
-test_results = pickle.load(open("test_results_2021_07_18_21_38_02.p", "rb"))
-print(test_results)
+test_results = pickle.load(open("test_results_2021_07_18_22_21_59.p", "rb"))
+print(json.dumps(test_results, indent=4))

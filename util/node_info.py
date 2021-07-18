@@ -35,3 +35,7 @@ def get_deployment_string():
 
 def print_node_info():
     print(get_deployment_string())
+
+
+if __name__ == "__main__":
+    print_node_info()

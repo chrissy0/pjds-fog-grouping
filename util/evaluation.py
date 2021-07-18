@@ -34,7 +34,7 @@ test_results = []
 group_modes = ["grouped", "random"]
 group_sizes = range(1, 2+1)
 durations = [0, 0.25, 0.5, 1]
-iterations = 2
+iterations = 10
 
 for group_mode in group_modes:
     if group_mode != "grouped":

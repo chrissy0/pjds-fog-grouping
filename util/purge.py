@@ -89,6 +89,8 @@ def purge(log=False):
     purge_leader(log)
     purge_group_members(log)
 
-# purge()
+
+if __name__ == "__main__":
+    purge(log=True)
 
 # TODO remove data from databases (only that that no longer makes sense)
