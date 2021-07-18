@@ -80,7 +80,8 @@ def get_leader_address_endpoint():
 
 @app.route('/empty-all-tables', methods=['POST'])
 def empty_all_tables_endpoint():
-    return empty_all_tables(connection)
+    empty_all_tables(connection)
+    return 'Emptied all tables'
 
 
 # ----------- API endpoints (leaders) -----------------------
