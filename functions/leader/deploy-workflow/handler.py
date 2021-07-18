@@ -85,10 +85,9 @@ def deploy_function(deployment_mode, nodes, body, external_ip, i, previous=None,
     elif deployment_mode == "single-node":
         node = nodes[i]
     elif deployment_mode == "grouped":
-        grp_i += 1 if i % grp_size == 0 else grp_i
-        node = nodes[ (grp_i -1) % len(nodes)]
+        node = nodes[(grp_i - 1) % len(nodes)]
     else:
-        node = nodes[ i % len(nodes) ]
+        node = nodes[i % len(nodes)]
 
     node_ip = node[0]
     node_secret = node[3]
@@ -143,8 +142,11 @@ def deploy_function(deployment_mode, nodes, body, external_ip, i, previous=None,
 
     if calls is not None:
         for call in calls:
-            i += 1 if deployment_mode != "single-node" else i
-            deploy_function(deployment_mode, nodes, call, external_ip, i, node_ip, grp_i, grp_size)
+            if deployment_mode != "single-node":
+                i += 1
+            if i % grp_size == 0:
+                grp_i += 1
+            deploy_function(deployment_mode, nodes, call, external_ip, i, node_ip, grp_size, grp_i)
     else:
         return "Calls is empty"
 
