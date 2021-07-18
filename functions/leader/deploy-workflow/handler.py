@@ -116,7 +116,11 @@ def deploy_function(deployment_mode, nodes, body, external_ip, i, previous=None,
         "image": registry,
         "readOnlyRootFilesystem": True,
         "envVars": {
-            "externalIp": node_ip
+            "externalIp": node_ip,
+            "read_timeout": "10m",
+            "write_timeout": "10m",
+            "exec_timeout": "10m",
+            "upstream_timeout": "10m"
         }
     })
 
