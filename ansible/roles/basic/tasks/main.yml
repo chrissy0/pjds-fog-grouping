@@ -1,6 +1,6 @@
 - name: Pull faasd
   git:
-    repo: 'https://github.com/openfaas/faasd.git'
+    repo: 'https://github.com/BieVic/faasd.git'
     dest: /srv/faasd/
 
 - name: Install faasd
@@ -22,9 +22,6 @@
 
 - name: Copy sqlite wrapper
   copy: src={{ playbook_dir | dirname }}/sqlite/sqlite_wrapper.py dest=/opt/sqlite_wrapper.py owner=sa_110764242531759494195 group=admin mode=755
-
-#- name: Start python wrapper
-#  command: python3 /opt/sqlite_wrapper.py
 
 - name: Start python wrapper
   shell: nohup python3 /opt/sqlite_wrapper.py &
