@@ -1,4 +1,4 @@
-# V1.3 2021.07.11 19:43
+# V1.4 2021.07.19 18:22
 
 import requests
 import json
@@ -26,7 +26,12 @@ def get_function_ip(external_ip, function_name):
         raise RuntimeError(error_msg)
 
 
-def __call_fn(function_ip, function_name, data):
+def __call_fn(function_ip, function_name, data, kubernetes_mode=False):
+
+    if kubernetes_mode:
+        response = requests.get(f"http://{function_ip}:{faasd_port}/function/{function_name}", data=data)
+        return response.content.decode("utf-8")
+
     for i in range(3):
         try:
             response = requests.get(f"http://{function_ip}:{faasd_port}/function/{function_name}", data=data)
@@ -63,8 +68,13 @@ def __get_alternative_function_ip_from_leader(external_ip, function_name, failed
 
 
 def call_fn(function_name, data):
+    kubernetes_mode = os.environ.get('kubernetesMode', False) == "True"
+
     external_ip = get_external_ip()
     function_ip = get_function_ip(external_ip, function_name)
+
+    if kubernetes_mode:
+        return __call_fn(function_ip, function_name, data, kubernetes_mode=True)
 
     try:
         response = __call_fn(function_ip, function_name, data)
