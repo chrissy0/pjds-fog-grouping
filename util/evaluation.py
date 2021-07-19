@@ -1,7 +1,7 @@
 import json
 from timeit import default_timer as timer
 import requests
-from deploy_evaluation_workflow_small import deploy_evaluation_workflow
+from deploy_evaluation_workflow import deploy_evaluation_workflow
 from node_data import group_nodes
 from node_info import get_deployment_string
 from purge import purge
@@ -27,15 +27,15 @@ def call_fn(fn_name, data, log=False):
     response = requests.get(f"http://{ip}:8080/function/{fn_name}", data=json.dumps(data))
     if log:
         print(response.content.decode("utf-8"))
-    return response.status_code == 200
+    return response.status_code == 200, response.content.decode("utf-8")
 
 
 test_results = []
 
 group_modes = ["grouped", "random"]
 group_sizes = range(1, 2+1)
-durations = [0, 0.25, 0.5, 1, 2, 5, 10, 15, 20, 25]
-iterations = 10
+durations = [0, 0.25, 0.5, 1, 2, 5, 10]
+iterations = 3
 
 for group_mode in group_modes:
     if group_mode != "grouped":
@@ -62,6 +62,7 @@ for group_mode in group_modes:
             test_results[-1]["group_sizes"][-1]["durations"][-1]["duration"] = duration
             test_results[-1]["group_sizes"][-1]["durations"][-1]["measurements"] = []
             test_results[-1]["group_sizes"][-1]["durations"][-1]["non-200-response-on-iteration"] = []
+            test_results[-1]["group_sizes"][-1]["durations"][-1]["responses"] = []
 
             print(f"Duration: {duration}")
             data = {
@@ -71,11 +72,13 @@ for group_mode in group_modes:
             for i in range(iterations):
                 print(f"#{i+1}")
                 start = timer()
-                successful = call_fn("evaluation-function-11", data)
+                # TODO check more carefully if the call was successful. Returned True even though execution time limit was not set.
+                successful, response = call_fn("evaluation-function-11", data, log=True)
                 end = timer()
                 print(end - start)
                 test_results[-1]["group_sizes"][-1]["durations"][-1]["measurements"].append(end - start)
                 if not successful:
                     test_results[-1]["group_sizes"][-1]["durations"][-1]["non-200-response-on-iteration"].append(i + 1)
+                test_results[-1]["group_sizes"][-1]["durations"][-1]["responses"].append(response)
 
 pickle.dump(test_results, open(f"test_results_{dt.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.p", "wb"))
