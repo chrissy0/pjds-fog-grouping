@@ -5,7 +5,7 @@
   gcp_compute_instance:
     state: absent
     name: "{{ passed_vm_name }}"
-    machine_type: n1-standard-1
+    machine_type: e2-micro
     zone: "{{ zone }}"
     project: "{{ gcp_project }}"
     auth_kind: "{{ gcp_cred_kind }}"

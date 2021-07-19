@@ -29,7 +29,7 @@
   gcp_compute_instance:
      state: present
      name: "{{ passed_vm_name }}"
-     machine_type: n1-standard-1
+     machine_type: e2-micro
      disks:
        - auto_delete: true
          boot: true
