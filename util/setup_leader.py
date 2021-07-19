@@ -18,7 +18,11 @@ def setup_leader():
             "image": "pjdsgrouping/deploy-workflow:latest",
             "readOnlyRootFilesystem": True,
             "envVars": {
-                "externalIp": leader_ip()
+                "externalIp": leader_ip(),
+                "read_timeout": "10m",
+                "write_timeout": "10m",
+                "exec_timeout": "10m",
+                "upstream_timeout": "10m"
             }
         })
     url = f"http://admin:{leader_secret()}@{leader_ip()}:8080/system/functions"
