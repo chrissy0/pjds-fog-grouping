@@ -4,7 +4,7 @@ import requests
 from node_data import leader_ip
 
 
-def deploy_evaluation_workflow(replicas=1, deployment_mode="grouped", group_size=2):
+def deploy_evaluation_workflow(replicas=1, deployment_mode="grouped", group_size=1, log=False):
     request = json.dumps({
         "name": "evaluation-function-01",
         "registry": "pjdsgrouping/evaluation-function-01",
@@ -76,7 +76,8 @@ def deploy_evaluation_workflow(replicas=1, deployment_mode="grouped", group_size
     })
 
     response = requests.get(f"http://{leader_ip()}:8080/function/deploy-workflow", data=request)
-    print(f"Deploy evaluation workflow: {response.content.decode('utf-8')}")
+    if log:
+        print(f"Deploy evaluation workflow: {response.content.decode('utf-8')}")
 
 
 if __name__ == "__main__":
