@@ -9,19 +9,24 @@ def empty_tables(ip):
 
 
 def delete_functions(name, ip, secret, log=False):
-    functions = list(map(lambda function_data: function_data["name"],
-                         json.loads(requests.get(f"http://admin:{secret}@{ip}:8080/system/functions").content)))
-    for function in functions:
-        if log:
-            print(f"Deleting {function}@{name}|{ip}")
-        url = f"http://admin:{secret}@{ip}:8080/system/functions"
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        payload = json.dumps({
-            "functionName": function
-        })
-        requests.request("DELETE", url, headers=headers, data=payload)
+    while True:
+        functions = list(map(lambda function_data: function_data["name"],
+                             json.loads(requests.get(f"http://admin:{secret}@{ip}:8080/system/functions").content)))
+        if len(functions) == 0:
+            if log:
+                print(f"Purged all functions on {name}, exiting function.")
+            return
+        for function in functions:
+            if log:
+                print(f"Deleting {function}@{name}|{ip}")
+            url = f"http://admin:{secret}@{ip}:8080/system/functions"
+            headers = {
+                'Content-Type': 'application/json'
+            }
+            payload = json.dumps({
+                "functionName": function
+            })
+            requests.request("DELETE", url, headers=headers, data=payload)
 
 
 def delete_leader_functions(log=False):
