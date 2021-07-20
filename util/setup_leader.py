@@ -32,6 +32,11 @@ def setup_leader():
     if response.status_code != 200:
         print("Couldn't deploy \"deploy-workflow\" function.")
 
+    for group_node in group_nodes():
+        print(f"Setting leader address on {group_node['name']}@{group_node['ip']}")
+        url = f"http://{group_node['ip']}:5000/set-leader-address"
+        requests.request("POST", url, data=leader_ip())
+
 
 if __name__ == "__main__":
     setup_leader()
