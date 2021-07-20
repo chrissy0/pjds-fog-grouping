@@ -37,13 +37,15 @@ def handle(req):
     nodes = [node.split() for node in nodes]
     nodes = sorted(nodes, key=lambda x: (x[1], x[2]))
 
-    # TODO: leave out nodes below certain threshold?
-
     # Deployment modes
     try:
         deployment_mode = body["deployment-mode"]
     except:
         deployment_mode = "default"
+
+    # remove nodes if CPU-load > 80%
+    if deployment_mode != "random":
+        nodes = [node for node in nodes if float(node[1]) <= 80 and float(node[2]) <= 80]
 
 
     try:
