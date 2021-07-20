@@ -97,5 +97,3 @@ def purge(log=False):
 
 if __name__ == "__main__":
     purge(log=True)
-
-# TODO remove data from databases (only that that no longer makes sense)
