@@ -20,15 +20,20 @@ def compute_memory():
 
 
 if __name__ == '__main__':
-    leader = get_leader_address()
-    if len(leader) != 0:
-        ip = requests.get('https://api.ipify.org').text
-        f = open("/var/lib/faasd/secrets/basic-auth-password", "r")
-        faasd_secret = f.read()
-        requests.post(f"http://{leader}:{SQLITE_PORT}/add-node",
-                      data=f"{ip},{compute_cpu()},{compute_memory()},{faasd_secret}")
-        f.close()
-        while True:
-            time.sleep(10)
-            leader = get_leader_address()
-            r = requests.post(f"http://{leader}:{SQLITE_PORT}/update-node", data=f"{ip},{compute_cpu()},{compute_memory()}")
+    ip = requests.get('https://api.ipify.org').text
+    f = open("/var/lib/faasd/secrets/basic-auth-password", "r")
+    faasd_secret = f.read()
+    f.close()
+    not_registered = True
+    while True:
+        leader = get_leader_address()
+        if len(leader) != 0:
+            if not_registered:
+                requests.post(f"http://{leader}:{SQLITE_PORT}/add-node",
+                              data=f"{ip},{compute_cpu()},{compute_memory()},{faasd_secret}")
+                not_registered = False
+
+            r = requests.post(f"http://{leader}:{SQLITE_PORT}/update-node",
+                              data=f"{ip},{compute_cpu()},{compute_memory()}")
+
+        time.sleep(10)
