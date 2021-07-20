@@ -33,9 +33,9 @@ def call_fn(fn_name, data, log=False):
 test_results = []
 
 group_modes = ["grouped", "random"]
-group_sizes = range(1, 2+1)
-durations = [0, 0.25, 0.5, 1, 2, 5, 10]
-iterations = 3
+group_sizes = range(1, 3+1)
+durations = [0, 0.1, 0.25 0.5, 1, 2]
+iterations = 5
 
 for group_mode in group_modes:
     if group_mode != "grouped":
@@ -73,7 +73,7 @@ for group_mode in group_modes:
                 print(f"#{i+1}")
                 start = timer()
                 # TODO check more carefully if the call was successful. Returned True even though execution time limit was not set.
-                successful, response = call_fn("evaluation-function-11", data, log=True)
+                successful, response = call_fn("evaluation-function-01", data, log=True)
                 end = timer()
                 print(end - start)
                 test_results[-1]["group_sizes"][-1]["durations"][-1]["measurements"].append(end - start)
