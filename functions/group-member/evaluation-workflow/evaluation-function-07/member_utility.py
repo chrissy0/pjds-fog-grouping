@@ -29,7 +29,7 @@ def get_function_ip(external_ip, function_name):
 def __call_fn(function_ip, function_name, data, kubernetes_mode=False):
 
     if kubernetes_mode:
-        response = requests.get(f"http://{function_ip}:{faasd_port}/function/{function_name}", data=data)
+        response = requests.get(f"http://gateway.openfaas:{faasd_port}/function/{function_name}", data=data)
         return response.content.decode("utf-8")
 
     for i in range(3):
@@ -70,11 +70,11 @@ def __get_alternative_function_ip_from_leader(external_ip, function_name, failed
 def call_fn(function_name, data):
     kubernetes_mode = os.environ.get('kubernetesMode', False) == "True"
 
+    if kubernetes_mode:
+        return __call_fn(None, function_name, data, kubernetes_mode=True)
+
     external_ip = get_external_ip()
     function_ip = get_function_ip(external_ip, function_name)
-
-    if kubernetes_mode:
-        return __call_fn(function_ip, function_name, data, kubernetes_mode=True)
 
     try:
         response = __call_fn(function_ip, function_name, data)
