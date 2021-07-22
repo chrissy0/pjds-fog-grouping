@@ -32,7 +32,7 @@ def delete_functions(name, ip, secret, log=False):
 def delete_leader_functions(log=False):
     if log:
         print(f"Deleting leader functions ({leader_name()}@{leader_ip()})")
-    delete_functions(leader_name(), leader_ip(), leader_secret())
+    delete_functions(leader_name(), leader_ip(), leader_secret(), log=log)
 
 
 def delete_all_group_functions(log=False):
@@ -42,7 +42,7 @@ def delete_all_group_functions(log=False):
         secret = group_node["secret"]
         if log:
             print(f"Deleting group functions ({name}@{ip})")
-        delete_functions(name, ip, secret)
+        delete_functions(name, ip, secret, log=log)
 
 
 def delete_all_functions(log=False):
