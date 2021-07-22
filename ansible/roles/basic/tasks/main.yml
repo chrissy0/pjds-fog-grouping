@@ -6,22 +6,37 @@
 - name: Install faasd
   command: sh /srv/faasd/hack/install.sh
 
+- name: Install sqlite3
+  apt:
+    name: sqlite3
+    state: present
+
 - name: Restart faasd because of known bug
   systemd:
     state: restarted
     daemon_reload: yes
     name: faasd
 
-- name: Install sqlite3
+- name: Install stress
   apt:
-    name: sqlite3
+    name: stress
     state: present
 
 - pip:
     name: flask
+
+- pip:
+    name: psutil
 
 - name: Copy sqlite wrapper
   copy: src={{ playbook_dir | dirname }}/sqlite/sqlite_wrapper.py dest=/opt/sqlite_wrapper.py owner=sa_110764242531759494195 group=admin mode=755
 
 - name: Start python wrapper
   shell: nohup python3 /opt/sqlite_wrapper.py &
+
+- name: Copy load scanner
+  copy: src={{ playbook_dir | dirname }}/load-scanner/load_scanner.py dest=/opt/load_scanner.py owner=sa_110764242531759494195 group=admin mode=755
+
+- name: Start load scanner
+  shell: nohup python3 /opt/load_scanner.py &
+  become: yes
