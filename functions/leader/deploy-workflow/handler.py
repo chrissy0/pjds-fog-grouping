@@ -45,7 +45,7 @@ def handle(req):
 
     # remove nodes if CPU-load > 80%
     if deployment_mode != "random":
-        nodes = [node for node in nodes if float(node[1]) <= 80 and float(node[2]) <= 80]
+        nodes = [node for node in nodes if float(node[1]) <= 80 and float(node[2]) <= 0.8]
 
 
     try:
