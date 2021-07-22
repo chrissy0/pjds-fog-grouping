@@ -6,7 +6,11 @@ from node_data import leader_ip, leader_secret, group_nodes
 def setup_leader():
     # add nodes to leader
     for group_node in group_nodes():
-        requests.post(f"http://{leader_ip()}:5000/add-node", f"{group_node['ip']},1,4,{group_node['secret']}")
+        requests.post(f"http://{leader_ip()}:5000/add-node", f"{group_node['ip']},0,0,{group_node['secret']}")
+    # for group_node in group_nodes()[:2]:
+    #     requests.post(f"http://{leader_ip()}:5000/add-node", f"{group_node['ip']},0,0,{group_node['secret']}")
+    # for group_node in group_nodes()[2:]:
+    #     requests.post(f"http://{leader_ip()}:5000/add-node", f"{group_node['ip']},100,1,{group_node['secret']}")
 
     # deploying "deploy-workflow" function
     headers = {
