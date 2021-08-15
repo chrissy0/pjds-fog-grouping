@@ -1,0 +1,14 @@
+POST http://localhost:5000/register-leader
+Content-Type: application/x-www-form-urlencoded
+
+ip=127.0.0.2&port=5001
+
+###
+
+
+DELETE http://localhost:5000/deregister-leader
+Content-Type: application/x-www-form-urlencoded
+
+ip=127.0.0.2
+
+###
