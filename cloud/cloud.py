@@ -4,34 +4,39 @@ from flask import request
 app = Flask(__name__)
 
 
-leaders = {}
+clusters = {}
 
 
 def response_object(message=None, code=200):
-    res = {"response": leaders}
+    res = {"response": clusters}
     if message:
         res["message"] = message
     return res, code
 
 
-@app.route('/register-leader', methods=['POST'])
-def register_leader():
+@app.route('/register-cluster', methods=['POST'])
+def register_cluster():
     ip = request.form["ip"]
     port = request.form["port"]
-    # Overwrites old entries
-    leaders[ip] = {
-        "port": port
+    location = {
+        "long": request.form["long"],
+        "lat": request.form["lat"]
     }
-    return response_object(f"Added leader '{ip}:{port}'.")
+    # Overwrites old entries
+    clusters[ip] = {
+        "port": port,
+        "location": location
+    }
+    return response_object(f"Added cluster '{ip}:{port}'.")
 
 
-@app.route('/deregister-leader', methods=['DELETE'])
-def deregister_leader():
+@app.route('/deregister-cluster', methods=['DELETE'])
+def deregister_cluster():
     ip = request.form["ip"]
     # Overwrites old entries
     try:
-        del leaders[ip]
-        return response_object(f"Deleted leader ip '{ip}'.")
+        del clusters[ip]
+        return response_object(f"Deleted cluster ip '{ip}'.")
     except KeyError:
-        return response_object(f"Leader ip '{ip}' is already non-existent and cannot be deleted.", 409)
+        return response_object(f"Cluster ip '{ip}' is already non-existent and cannot be deleted.", 409)
 

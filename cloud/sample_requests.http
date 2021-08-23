@@ -1,12 +1,28 @@
-POST http://localhost:5000/register-leader
+POST http://localhost:5000/register-cluster
 Content-Type: application/x-www-form-urlencoded
 
-ip=127.0.0.2&port=5001
+ip=127.0.0.1&port=5001&long=50.1&lat=46.22
 
 ###
 
 
-DELETE http://localhost:5000/deregister-leader
+POST http://localhost:5000/register-cluster
+Content-Type: application/x-www-form-urlencoded
+
+ip=127.0.0.2&port=5001&long=25.8347&lat=11.0923423
+
+###
+
+
+DELETE http://localhost:5000/deregister-cluster
+Content-Type: application/x-www-form-urlencoded
+
+ip=127.0.0.2
+
+###
+
+
+DELETE http://localhost:5000/deregister-cluster
 Content-Type: application/x-www-form-urlencoded
 
 ip=127.0.0.2
