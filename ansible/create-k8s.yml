@@ -7,3 +7,5 @@
   roles:
     - network
     - k8s
+    - network2
+    - k8s2

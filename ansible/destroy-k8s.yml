@@ -7,3 +7,5 @@
   roles:
     - destroy_k8s
     - destroy_network
+    - destroy_k8s2
+    - destroy_network2
