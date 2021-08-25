@@ -5,3 +5,6 @@
 
 # Teardown
 - `ansible-playbook ansible/create-k8s.yml -i ansible/inventory/gcp.yml`
+
+# Misc
+Guide used: https://faun.pub/how-to-automate-the-setup-of-a-kubernetes-cluster-on-gcp-e97918bf41de
