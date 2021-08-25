@@ -1,0 +1,17 @@
+all:
+  vars:
+    # use this section to enter GCP related information
+    zone: europe-west2-c
+    region: europe-west2
+    project_id: pjds-fog-grouping
+    gcloud_sa_path: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
+    #credentials_file: "{{ lookup('env','HOME') }}/{{ gcloud_sa_path }}"
+    credentials_file: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
+    gcloud_service_account: service-account@project-id.iam.gserviceaccount.com
+
+    # use the section below to enter k8s cluster related information
+    cluster_name: pjds-cluster-1
+    initial_node_count: 2
+    disk_size_gb: 10
+    #disk_type: pd-ssd
+    machine_type: n1-standard-1
