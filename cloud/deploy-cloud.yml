@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+   name: cloud-app-pod
+spec:
+   containers:
+   - name: cloud-app
+     image: pjdsgrouping/cloud-app:latest
+     ports:
+     - containerPort: 5000
