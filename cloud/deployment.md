@@ -1,6 +1,8 @@
 # Compute Instance (Ansible)
 ## Deployment
 - `ansible-playbook ansible/deploy-cloud.yml -i ansible/inventory/gcp.yml`
+Upon error (remote host identification has changed), reset known hosts
+- `mv ~/.ssh/known_hosts ~/.ssh/known_hosts.bak`
 ## Teardown
 - `ansible-playbook ansible/destroy-cloud.yml -i ansible/inventory/gcp.yml`
 # Kubernetes (not used)
