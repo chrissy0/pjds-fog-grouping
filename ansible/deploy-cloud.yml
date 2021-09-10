@@ -1,0 +1,24 @@
+---
+- name: deploy cloud
+  hosts: localhost
+  gather_facts: false
+  vars:
+    gcp_project: pjds-fog-grouping
+    gcp_cred_kind: serviceaccount
+    gcp_cred_file: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
+    zone: "europe-west3-a"
+    region: "europe-west3"
+  roles:
+    - deploy_cloud
+
+- name: Manage cloud
+  hosts: cloudgroup
+  vars:
+    ansible_ssh_private_key_file: "{{ playbook_dir | dirname }}/credentials/ssh-key-ansible-sa"
+  connection: ssh
+  remote_user: sa_110764242531759494195
+  become: True
+  roles:
+    - update
+    - python3
+    - basic

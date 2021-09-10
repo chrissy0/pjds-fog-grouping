@@ -1,0 +1,12 @@
+---
+- name: destroy cloud
+  hosts: localhost
+  gather_facts: false
+  vars:
+    gcp_project: pjds-fog-grouping
+    gcp_cred_kind: serviceaccount
+    gcp_cred_file: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
+    zone: "europe-west3-a"
+    region: "europe-west3"
+  roles:
+    - destroy_cloud

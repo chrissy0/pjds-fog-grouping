@@ -1,0 +1,8 @@
+- pip:
+    name: flask
+
+- name: Copy cloud flask script
+  copy: src={{ playbook_dir | dirname }}/cloud/cloud.py dest=/opt/cloud.py owner=sa_110764242531759494195 group=admin mode=755
+
+- name: Start cloud flask script
+  shell: nohup python3 /opt/cloud.py &

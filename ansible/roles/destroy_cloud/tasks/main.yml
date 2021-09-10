@@ -1,0 +1,11 @@
+- name: destroying cloud instance
+  gcp_compute_instance:
+    state: absent
+    name: "cloud"
+    machine_type: n1-standard-1
+    zone: "{{ zone }}"
+    project: "{{ gcp_project }}"
+    auth_kind: "{{ gcp_cred_kind }}"
+    service_account_file: "{{ gcp_cred_file }}"
+    scopes:
+    - https://www.googleapis.com/auth/compute
