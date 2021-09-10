@@ -84,5 +84,6 @@ def cluster_suggestions():
         "closest_clusters": clusters_incl_distance[:max_number_of_requested_clusters]
     })
 
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0")

@@ -1,0 +1,1 @@
+`sudo faas-cli build -f register-cluster.yml;sudo faas-cli push -f register-cluster.yml`
