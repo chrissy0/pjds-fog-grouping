@@ -1,50 +1,52 @@
 import json
 import requests
+from cloud_and_cluster_data import get_cloud
+from cloud_and_cluster_data import get_clusters
 
 
-cloud_ip = "34.141.21.222"
-cluster_ip = "35.197.228.182"
-lat = "50.3"
-lon = "13.2"
-
+cloud_ip = get_cloud()["ip"]
 
 function_name = "register-cluster"
 registry_url = "pjdsgrouping/register-cluster:latest"
 
-
-openfaas_gateway_ip = "35.197.228.182"
-openfaas_gateway_port = "8080"
-openfaas_secret = "oS79L001B60K6Z76MSwPFhhei"
-url = f"http://admin:{openfaas_secret}@{openfaas_gateway_ip}:{openfaas_gateway_port}/system/functions"
-
-headers = {
-    'Content-Type': 'application/json'
-}
-
-# Deploy Function
-payload = json.dumps({
-    "service": function_name,
-    "network": "func_functions",
-    "image": registry_url,
-    "readOnlyRootFilesystem": True,
-    "envVars": {
-        "cloudIp": cloud_ip,
-        "clusterIp": cluster_ip,
-        "lat": lat,
-        "lon": lon
+for cluster in get_clusters():
+    cluster_ip = cluster["ip"]
+    lat = cluster["lat"]
+    lon = cluster["lon"]
+    
+    openfaas_gateway_ip = cluster_ip
+    openfaas_gateway_port = "8080"
+    openfaas_secret = cluster["secret"]
+    url = f"http://admin:{openfaas_secret}@{openfaas_gateway_ip}:{openfaas_gateway_port}/system/functions"
+    
+    headers = {
+        'Content-Type': 'application/json'
     }
-})
-
-response = requests.request("POST", url, headers=headers, data=payload)
-print(response)
-if response.status_code != 202:
-    response = requests.request("PUT", url, headers=headers, data=payload)
+    
+    # Deploy Function
+    payload = json.dumps({
+        "service": function_name,
+        "network": "func_functions",
+        "image": registry_url,
+        "readOnlyRootFilesystem": True,
+        "envVars": {
+            "cloudIp": cloud_ip,
+            "clusterIp": cluster_ip,
+            "lat": lat,
+            "lon": lon
+        }
+    })
+    
+    response = requests.request("POST", url, headers=headers, data=payload)
     print(response)
-if response.status_code != 202:
-    # TODO handle
-    print("Deployment not successful.")
-
-
-function_url = f"http://{openfaas_gateway_ip}:{openfaas_gateway_port}/function/{function_name}"
-response = requests.request("GET", function_url)
-print(response)
+    if response.status_code != 202:
+        response = requests.request("PUT", url, headers=headers, data=payload)
+        print(response)
+    if response.status_code != 202:
+        # TODO handle
+        print("Deployment not successful.")
+    
+    
+    function_url = f"http://{openfaas_gateway_ip}:{openfaas_gateway_port}/function/{function_name}"
+    response = requests.request("GET", function_url)
+    print(response)
