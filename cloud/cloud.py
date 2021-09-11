@@ -63,6 +63,13 @@ def deregister_cluster():
         return response_object(f"Cluster ip '{ip}' is already non-existent and cannot be deleted.", 409)
 
 
+@app.route('/reset', methods=['DELETE'])
+def reset():
+    global clusters
+    clusters = {}
+    return response_object(f"Cloud was reset (all clusters were deregistered).")
+
+
 @app.route('/cluster-suggestions', methods=['POST'])
 def cluster_suggestions():
     request_source_ip = request.form["ip"]

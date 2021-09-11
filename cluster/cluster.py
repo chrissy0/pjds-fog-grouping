@@ -51,7 +51,7 @@ def rebalance_resources():
     nearby_clusters = json.loads(response.text)["closest_clusters"]
 
     # get latency to clusters
-    # TODO setup and register 2 clusters, check actual latency
+    # TODO setup and register 2 clusters, check actual latency (cluster_ip:8080, regardless of status code)
     print(nearby_clusters)
 
 
