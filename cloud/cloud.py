@@ -78,6 +78,7 @@ def cluster_suggestions():
         "port": clusters[cluster]["port"],
         "distance": calculate_distance(source_location, clusters[cluster]["location"])
     }, clusters))
+    clusters_incl_distance = filter(lambda cluster: cluster["ip"] != request_source_ip, clusters_incl_distance)
     clusters_incl_distance = sorted(clusters_incl_distance, key=lambda k: k['distance'])
 
     return jsonify({
