@@ -7,6 +7,7 @@ from flask import request
 from datetime import datetime
 import requests
 import json
+from timeit import default_timer as timer
 
 
 error_log = []
@@ -51,8 +52,23 @@ def rebalance_resources():
     nearby_clusters = json.loads(response.text)["closest_clusters"]
 
     # get latency to clusters
-    # TODO setup and register 2 clusters, check actual latency (cluster_ip:8080, regardless of status code)
-    print(nearby_clusters)
+    for nearby_cluster in nearby_clusters:
+        ip = nearby_cluster["ip"]
+        for i in range(5):
+            # measuring latency
+            start_time = timer()
+            response = requests.get(f"http://{ip}:8080")
+            end_time = timer()
+            if response.status_code != 401:
+                # TODO unexpected response, handle
+                pass
+            roundtrip_latency = end_time - start_time
+            # keeping lowest measured latency
+            if "latency" not in nearby_cluster or nearby_cluster["latency"] > roundtrip_latency:
+                nearby_cluster["latency"] = roundtrip_latency
+
+    nearby_clusters_sorted_by_latency = sorted(nearby_clusters, key=lambda k: k['latency'])
+    # TODO next: Request suggestions for nodes from nearest clusters, make decision, initialize node exchange
 
 
 sched = BackgroundScheduler(daemon=True)
