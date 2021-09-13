@@ -4,6 +4,7 @@
 - `kubectl get nodes` (just to test the setup was successful)
 - `arkade install openfaas --load-balancer`
 - `kubectl rollout status -n openfaas deploy/gateway`
+- `kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml --tls-cert-file=/etc/kubernetes/pki/apiserver/tls.crt --tls-private-key-file=/etc/kubernetes/pki/apiserver/tls.key`
 - `kubectl port-forward svc/gateway -n openfaas 8080:8080` (access ui @ localhost:8080, for 2nd: 8081:8080)
 
 Get password:
