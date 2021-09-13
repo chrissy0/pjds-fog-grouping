@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+   name: cluster-app-pod
+spec:
+   containers:
+   - name: cluster-app
+     image: pjdsgrouping/cluster-app:latest
+     ports:
+     - containerPort: 5000
