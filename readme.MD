@@ -15,6 +15,9 @@ Get OpenFaas gateway IP: `kubectl get -n openfaas svc/gateway-external`
 ```shell
 ansible-playbook ansible/create-k8s.yml -i ansible/inventory/gcp.yml
 
+gcloud compute firewall-rules create cluster-flask --allow tcp:5000
+gcloud compute firewall-rules create kubectl-flask --allow tcp:5001
+
 # (for 2nd: `pjds-cluster-2`)
 gcloud container clusters get-credentials pjds-cluster-1 --zone europe-west2-c --project pjds-fog-grouping
 
@@ -45,7 +48,11 @@ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/late
 docker build -t cluster-app .
 docker tag cluster-app pjdsgrouping/cluster-app
 docker push pjdsgrouping/cluster-app
+kubectl delete pod cluster-app-pod
 kubectl create -f deploy-cluster.yml
+kubectl apply -f cluster-service.yml
+# get public ip:
+kubectl get svc
 
 kubectl port-forward cluster-app-pod 5000
 
@@ -57,8 +64,14 @@ sudo chown 1001 config
 docker build -t kubectl-pod .
 docker tag kubectl-pod pjdsgrouping/kubectl-pod
 docker push pjdsgrouping/kubectl-pod
+kubectl delete pod kubectl-pod
 kubectl create -f deploy-kubectl-pod.yml
-kubectl port-forward kubectl-pod 5001
+# later: kubectl port-forward kubectl-pod 5001
+
+# setup service to access kubectl-pod:
+kubectl apply -f kubectl-service.yml
+# get static ip of kubectl-pod
+kubectl get service kubectl-service --output yaml | grep clusterIP:
 ```
 
 #### Teardown

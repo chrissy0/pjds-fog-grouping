@@ -98,5 +98,16 @@ def get_error_log():
     return jsonify(results=error_log)
 
 
+@app.route('/debug-request', methods=['POST'])
+def debug_request():
+    url = request.form["url"]
+    try:
+        data = request.form["data"]
+    except:
+        data = None
+    response = requests.get(url, data=data)
+    return f"Resp:\n{response.text}"
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
