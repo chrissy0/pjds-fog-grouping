@@ -5,8 +5,6 @@
 
 Upon error (remote host identification has changed), reset known hosts
 - `mv ~/.ssh/known_hosts ~/.ssh/known_hosts.bak`
-
-Get OpenFaas gateway IP: `kubectl get -n openfaas svc/gateway-external`
 #### Teardown
 - `ansible-playbook ansible/destroy-cloud.yml -i ansible/inventory/gcp.yml`
 
@@ -15,6 +13,7 @@ Get OpenFaas gateway IP: `kubectl get -n openfaas svc/gateway-external`
 ```shell
 ansible-playbook ansible/create-k8s.yml -i ansible/inventory/gcp.yml
 
+# Only 1x per google cloud account
 gcloud compute firewall-rules create cluster-flask --allow tcp:5000
 gcloud compute firewall-rules create kubectl-flask --allow tcp:5001
 
@@ -72,6 +71,15 @@ kubectl create -f deploy-kubectl-pod.yml
 kubectl apply -f kubectl-service.yml
 # get static ip of kubectl-pod
 kubectl get service kubectl-service --output yaml | grep clusterIP:
+```
+Get OpenFaas gateway IP: `kubectl get -n openfaas svc/gateway-external`
+
+SSH into kubectl-pod: `kubectl exec --stdin --tty kubectl-pod -- /bin/ash`
+
+#### Draining a node
+```shell
+# TODO remove "--delete-local-data" from command?
+kubectl drain gke-pjds-cluster-1-node-pool-pjds-clu-35b0997a-jg19 --ignore-daemonsets --delete-local-data --force
 ```
 
 #### Teardown
