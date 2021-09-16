@@ -3,10 +3,10 @@ all:
     # use this section to enter GCP related information
     zone: europe-west2-c
     region: europe-west2
-    project_id: pjds-fog-grouping
-    gcloud_sa_path: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
+    project_id: pjds-fog-grouping-326209
+    gcloud_sa_path: "{{ playbook_dir | dirname }}/credentials/pjds-fog-grouping-326209-8db0019fa804.json"
     #credentials_file: "{{ lookup('env','HOME') }}/{{ gcloud_sa_path }}"
-    credentials_file: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
+    credentials_file: "{{ playbook_dir | dirname }}/credentials/pjds-fog-grouping-326209-8db0019fa804.json"
     gcloud_service_account: service-account@project-id.iam.gserviceaccount.com
 
     # use the section below to enter k8s cluster related information
