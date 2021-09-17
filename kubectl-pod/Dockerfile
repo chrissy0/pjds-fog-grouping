@@ -3,6 +3,7 @@ RUN apk update && apk add curl git
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.22.1/bin/linux/amd64/kubectl
 RUN chmod u+x kubectl && mv kubectl /bin/kubectl
 ADD config /root/.kube/config
+#ADD bin/gcloud /usr/lib/google-cloud-sdk/bin/gcloud
 
 ADD kubectl.py /
 #COPY . /app

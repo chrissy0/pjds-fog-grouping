@@ -15,7 +15,7 @@ def get_cluster_ip():
 
 
 def get_cluster_port():
-    return 8080
+    return 5000
 
 
 def get_lat():
@@ -41,3 +41,5 @@ def handle(req):
         "lon": lon
     }
     requests.post(f"http://{get_cloud_ip()}:{get_cloud_port()}/register-cluster", data=data)
+
+# after changes, do: `sudo faas-cli build -f register-cluster.yml;sudo faas-cli push -f register-cluster.yml`

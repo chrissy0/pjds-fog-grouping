@@ -18,7 +18,7 @@ gcloud compute firewall-rules create cluster-flask --allow tcp:5000
 gcloud compute firewall-rules create kubectl-flask --allow tcp:5001
 
 # (for 2nd: `pjds-cluster-2`)
-gcloud container clusters get-credentials pjds-cluster-1 --zone europe-west2-c --project pjds-fog-grouping
+gcloud container clusters get-credentials pjds-cluster-1 --zone europe-west2-c --project pjds-fog-grouping-326209
 
 # (just to test the setup was successful)
 kubectl get nodes
@@ -44,27 +44,34 @@ faas-cli list
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
 # Inside /cluster directory
+cd cluster
 docker build -t cluster-app .
 docker tag cluster-app pjdsgrouping/cluster-app
 docker push pjdsgrouping/cluster-app
 kubectl delete pod cluster-app-pod
 kubectl create -f deploy-cluster.yml
 kubectl apply -f cluster-service.yml
+cd ..
 # get public ip:
 kubectl get svc
 
 kubectl port-forward cluster-app-pod 5000
 
 # kubectl-pod
+cd kubectl-pod
 cp ~/.kube/config config
 # The next part is for some reason only necessary sometimes? If it doesn't work, replace `1001` by `$UID`
 sudo chown 1001 config
 # If there is an error, try get-credentials again
+#cp -r /usr/lib/google-cloud-sdk/bin/ bin
+#sudo chown 1001 bin/
+
 docker build -t kubectl-pod .
 docker tag kubectl-pod pjdsgrouping/kubectl-pod
 docker push pjdsgrouping/kubectl-pod
 kubectl delete pod kubectl-pod
 kubectl create -f deploy-kubectl-pod.yml
+cd ..
 # later: kubectl port-forward kubectl-pod 5001
 
 # setup service to access kubectl-pod:
