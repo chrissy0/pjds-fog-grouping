@@ -2,7 +2,7 @@
     name: flask
 
 - name: Copy cloud flask script
-  copy: src={{ playbook_dir | dirname }}/cloud/cloud.py dest=/opt/cloud.py owner=sa_110764242531759494195 group=admin mode=755
+  copy: src={{ playbook_dir | dirname }}/cloud/cloud.py dest=/opt/cloud.py owner=sa_103183904426379622520 group=admin mode=755
 
 - name: Start cloud flask script
   shell: nohup python3 /opt/cloud.py &

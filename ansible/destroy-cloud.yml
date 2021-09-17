@@ -3,9 +3,9 @@
   hosts: localhost
   gather_facts: false
   vars:
-    gcp_project: pjds-fog-grouping
+    gcp_project: pjds-fog-grouping-326209
     gcp_cred_kind: serviceaccount
-    gcp_cred_file: "{{ playbook_dir | dirname }}/credentials/gcp-key-ansible-sa.json"
+    gcp_cred_file: "{{ playbook_dir | dirname }}/credentials/pjds-fog-grouping-326209-8db0019fa804.json"
     zone: "europe-west3-a"
     region: "europe-west3"
   roles:
