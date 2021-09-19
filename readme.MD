@@ -71,11 +71,11 @@ docker tag kubectl-pod pjdsgrouping/kubectl-pod
 docker push pjdsgrouping/kubectl-pod
 kubectl delete pod kubectl-pod
 kubectl create -f deploy-kubectl-pod.yml
-cd ..
-# later: kubectl port-forward kubectl-pod 5001
 
 # setup service to access kubectl-pod:
 kubectl apply -f kubectl-service.yml
+cd ..
+# later: kubectl port-forward kubectl-pod 5001
 # get static ip of kubectl-pod
 kubectl get service kubectl-service --output yaml | grep clusterIP:
 ```

@@ -37,17 +37,12 @@ def add_to_log(message, do_print=True):
 
 
 def rebalance_resources():
-    add_to_log(f"cloud_ip: {cloud_ip}")
-    add_to_log(f"cluster_external_ip: {cluster_external_ip}")
-    add_to_log(f"kubectl_pod_internal_ip: {kubectl_pod_internal_ip}")
-
     if cloud_ip is None or cluster_external_ip is None or kubectl_pod_internal_ip is None:
         return
 
     response = requests.get(f"http://{kubectl_pod_internal_ip}:5001/get-node-info")
     if response.status_code != 200:
-        add_to_log(f"Could not get node info from kubectl pod.")
-        return response_object(log, 409)
+        return response_object(f"Could not get node info from kubectl pod.", 409)
     cluster_node_info = json.loads(response.text)["node_info"]
     if len(cluster_node_info) == 0: # TODO if nothing works remove this and try again
         # TODO more stuff to do here?
@@ -65,18 +60,14 @@ def rebalance_resources():
         "limit": 10
     }
     response = requests.post(f"http://{cloud_ip}:5000/cluster-suggestions", data=data)
-    add_to_log("a")
     if response.status_code != 200:
         add_to_log(
             f"Could not get nearby cluster suggestions for {cluster_external_ip}. Is the cluster registered in the cloud?")
-    add_to_log("b")
     add_to_log(response.text)
     nearby_clusters = json.loads(response.text)["closest_clusters"]
-    add_to_log("c")
 
     # get latency to clusters
     for nearby_cluster in nearby_clusters:
-        add_to_log("d")
         ip = nearby_cluster["ip"]
         add_to_log(ip)
         for i in range(5):
@@ -84,23 +75,19 @@ def rebalance_resources():
             start_time = timer()
             response = requests.get(f"http://{ip}:5000/ping")
             end_time = timer()
-            add_to_log("f")
             if response.status_code != 200:
                 # TODO unexpected response, handle
                 pass
             roundtrip_latency = end_time - start_time
-            add_to_log("g")
             # keeping lowest measured latency
             if "latency" not in nearby_cluster or nearby_cluster["latency"] > roundtrip_latency:
                 nearby_cluster["latency"] = roundtrip_latency
-            add_to_log("h")
 
     nearby_clusters_sorted_by_latency = sorted(nearby_clusters, key=lambda k: k['latency'])
     add_to_log(nearby_clusters_sorted_by_latency)
     # TODO next: Request suggestions for nodes from nearest clusters, make decision, initialize node exchange
     for cluster in nearby_clusters_sorted_by_latency:
         response = requests.get(f"http://{cluster['ip']}:5000/request-node-exchange")
-        add_to_log(response)
         add_to_log(response.text)
         if response.status_code != 200:
             add_to_log(f"Could not agree on exchanging nodes with node @{cluster['ip']}")
@@ -152,15 +139,13 @@ def request_node():
         return response_object("kubectl_pod_internal_ip was not set.", 409)
     response = requests.get(f"http://{kubectl_pod_internal_ip}:5001/get-node-info")
     if response.status_code != 200:
-        add_to_log(f"Could not get node info from kubectl pod.")
-        return response_object(log, 409)
+        return response_object(f"Could not get node info from kubectl pod.", 409)
     cluster_node_info = json.loads(response.text)["node_info"]
     avg_cpu_usage_after_shutting_down_another_node = sum(list(map(lambda x: float(x["cpu_percent"][:-1]), cluster_node_info))) / (len(cluster_node_info) - 1)
     if avg_cpu_usage_after_shutting_down_another_node > max_avg_cpu_usage:
-        add_to_log(f"Average CPU usage after removing one node exceeds {max_avg_cpu_usage}% ({avg_cpu_usage_after_shutting_down_another_node}%), thus no nodes can be offered.")
-        return response_object(log, 409)
+        return response_object(f"Average CPU usage after removing one node exceeds {max_avg_cpu_usage}% ({avg_cpu_usage_after_shutting_down_another_node}%), thus no nodes can be offered.", 409)
     # TODO shutdown node
-    return response_object("Node will be shutdown.", 409)
+    return response_object("Node will be shutdown.", 200)
 
 
 
@@ -178,6 +163,12 @@ def debug_request():
 @app.route('/ping', methods=['GET'])
 def ping_pong():
     return "pong"
+
+
+# Returning exceptions
+@app.errorhandler(Exception)
+def exception_handler(error):
+    return f"Error occurred: {repr(error)}"
 
 
 if __name__ == '__main__':
