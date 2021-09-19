@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: kubectl-pod
+   labels:
+     app: kubectl-pod
+spec:
+   replicas: 1
+   selector:
+      matchLabels:
+         app: kubectl-pod
+   template:
+      metadata:
+         labels:
+           app: kubectl-pod
+      spec:
+         containers:
+         - name: kubectl-pod
+           image: pjdsgrouping/kubectl-pod:latest
+           ports:
+           - containerPort: 5001
