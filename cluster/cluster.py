@@ -14,7 +14,8 @@ log = []
 cloud_ip = None
 cluster_external_ip = None
 kubectl_pod_internal_ip = None
-max_avg_cpu_usage = 0
+max_avg_cpu_usage = 0  # TODO change
+rebalance_locked = False
 
 
 def response_object(message=None, code=200):
@@ -37,6 +38,9 @@ def add_to_log(message, do_print=True):
 
 
 def rebalance_resources():
+    if rebalance_locked:
+        return
+
     if cloud_ip is None or cluster_external_ip is None or kubectl_pod_internal_ip is None:
         return
 
@@ -134,6 +138,8 @@ def get_error_log():
 
 @app.route('/request-node-exchange', methods=['GET'])
 def request_node():
+    if rebalance_locked:
+        return response_object("Rebalancing is currently disabled for this cluster.", 409)
     global kubectl_pod_internal_ip
     if kubectl_pod_internal_ip is None:
         return response_object("kubectl_pod_internal_ip was not set.", 409)
