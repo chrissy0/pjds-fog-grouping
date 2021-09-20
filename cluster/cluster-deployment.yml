@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: cluster-app
+   labels:
+     app: cluster-app
+spec:
+   replicas: 1
+   selector:
+      matchLabels:
+         app: cluster-app
+   template:
+      metadata:
+         labels:
+           app: cluster-app
+      spec:
+        containers:
+        - name: cluster-app
+          image: pjdsgrouping/cluster-app:latest
+          ports:
+          - containerPort: 5000
