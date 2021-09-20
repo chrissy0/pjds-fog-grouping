@@ -40,6 +40,8 @@ def response_object(message=None, code=200):
 def register_cluster():
     ip = request.form["ip"]
     port = request.form["port"]
+    openfaas_ip = request.form["openfaas_ip"]
+    openfaas_secret = request.form["openfaas_secret"]
     location = {
         "lon": request.form["lon"],
         "lat": request.form["lat"]
@@ -47,7 +49,9 @@ def register_cluster():
     # Overwrites old entries
     clusters[ip] = {
         "port": port,
-        "location": location
+        "location": location,
+        "openfaas_ip": openfaas_ip,
+        "openfaas_secret": openfaas_secret,
     }
     return response_object(f"Added cluster '{ip}:{port}'.")
 

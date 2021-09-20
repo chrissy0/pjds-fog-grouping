@@ -14,6 +14,8 @@ log = []
 cloud_ip = None
 cluster_external_ip = None
 kubectl_pod_internal_ip = None
+openfaas_ip = None
+openfaas_secret = None
 max_avg_cpu_usage = 0  # TODO change
 rebalance_locked = False
 registered = False
@@ -43,19 +45,22 @@ def add_to_log(message, do_print=True):
 def rebalance_resources():
     global registered
     if not registered:
-        if cloud_ip is not None and cluster_external_ip is not None and kubectl_pod_internal_ip is not None and lat is not None and lon is not None:
-            data = {
-                "ip": cluster_external_ip,
-                "port": 5000,
-                "lat": lat,
-                "lon": lon
-            }
-            requests.post(f"http://{cloud_ip}:5000/register-cluster", data=data)  # TODO check if worked?
+        if cloud_ip is None or cluster_external_ip is None or kubectl_pod_internal_ip is None or lat is None or lon is None or openfaas_ip is None or openfaas_secret is None:
+            return
+        data = {
+            "ip": cluster_external_ip,
+            "port": 5000,
+            "openfaas_ip": openfaas_ip,
+            "openfaas_secret": openfaas_secret,
+            "lat": lat,
+            "lon": lon
+        }
+        response = requests.post(f"http://{cloud_ip}:5000/register-cluster", data=data)
+        if response.status_code == 200:
             registered = True
+        else:
+            return
     if rebalance_locked:
-        return
-
-    if cloud_ip is None or cluster_external_ip is None or kubectl_pod_internal_ip is None:
         return
 
     response = requests.get(f"http://{kubectl_pod_internal_ip}:5001/get-node-info")
@@ -123,33 +128,17 @@ sched.start()
 app = Flask(__name__)
 
 
-@app.route('/set-cloud-ip', methods=['POST'])
-def set_cloud_ip():
-    global cloud_ip
-    cloud_ip = request.form["ip"]
-    return response_object(f"Cloud ip was set to {cloud_ip}")
-
-
-@app.route('/set-cluster-external-ip', methods=['POST'])
-def set_cluster_external_ip():
-    global cluster_external_ip
-    cluster_external_ip = request.form["ip"]
-    return response_object(f"Cluster external ip was set to {cluster_external_ip}")
-
-
-@app.route('/set-kubectl-pod-internal-ip', methods=['POST'])
-def set_kubectl_pod_internal_ip():
-    global kubectl_pod_internal_ip
-    kubectl_pod_internal_ip = request.form["ip"]
-    return response_object(f"Kubectl internal ip was set to {kubectl_pod_internal_ip}")
-
-
-@app.route('/set-location', methods=['POST'])
-def set_location():
-    global lat, lon
+@app.route('/init-cluster', methods=['POST'])
+def init_cluster():
+    global cloud_ip, cluster_external_ip, kubectl_pod_internal_ip, openfaas_ip, openfaas_secret, lat, lon
+    cloud_ip = request.form["cloud_ip"]
+    cluster_external_ip = request.form["cluster_external_ip"]
+    kubectl_pod_internal_ip = request.form["kubectl_pod_internal_ip"]
+    openfaas_ip = request.form["openfaas_ip"]
+    openfaas_secret = request.form["openfaas_secret"]
     lat = request.form["lat"]
     lon = request.form["lon"]
-    return response_object(f"Location was set (lat={lat}, lon={lon})")
+    return response_object(f"Cluster was initialized.")
 
 
 @app.route('/get-log', methods=['GET'])
