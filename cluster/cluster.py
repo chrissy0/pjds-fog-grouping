@@ -16,6 +16,9 @@ cluster_external_ip = None
 kubectl_pod_internal_ip = None
 max_avg_cpu_usage = 0  # TODO change
 rebalance_locked = False
+registered = False
+lat = None
+lon = None
 
 
 def response_object(message=None, code=200):
@@ -38,6 +41,17 @@ def add_to_log(message, do_print=True):
 
 
 def rebalance_resources():
+    global registered
+    if not registered:
+        if cloud_ip is not None and cluster_external_ip is not None and kubectl_pod_internal_ip is not None and lat is not None and lon is not None:
+            data = {
+                "ip": cluster_external_ip,
+                "port": 5000,
+                "lat": lat,
+                "lon": lon
+            }
+            requests.post(f"http://{cloud_ip}:5000/register-cluster", data=data)  # TODO check if worked?
+            registered = True
     if rebalance_locked:
         return
 
@@ -48,7 +62,7 @@ def rebalance_resources():
     if response.status_code != 200:
         return response_object(f"Could not get node info from kubectl pod.", 409)
     cluster_node_info = json.loads(response.text)["node_info"]
-    if len(cluster_node_info) == 0: # TODO if nothing works remove this and try again
+    if len(cluster_node_info) == 0:
         # TODO more stuff to do here?
         return
     add_to_log(f"Got cluster node info: {cluster_node_info}")
@@ -128,6 +142,14 @@ def set_kubectl_pod_internal_ip():
     global kubectl_pod_internal_ip
     kubectl_pod_internal_ip = request.form["ip"]
     return response_object(f"Kubectl internal ip was set to {kubectl_pod_internal_ip}")
+
+
+@app.route('/set-location', methods=['POST'])
+def set_location():
+    global lat, lon
+    lat = request.form["lat"]
+    lon = request.form["lon"]
+    return response_object(f"Location was set (lat={lat}, lon={lon})")
 
 
 @app.route('/get-log', methods=['GET'])

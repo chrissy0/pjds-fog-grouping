@@ -21,39 +21,40 @@ for cluster in get_clusters():
     cluster_ip = cluster["cluster_ip"]
     kubectl_pod_ip = cluster["kubectl_pod_ip"]
 
-    url = f"http://admin:{openfaas_secret}@{openfaas_gateway_ip}:{openfaas_gateway_port}/system/functions"
-    
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
-    # Deploy Function
-    payload = json.dumps({
-        "service": function_name,
-        "network": "func_functions",
-        "image": registry_url,
-        "readOnlyRootFilesystem": True,
-        "envVars": {
-            "cloudIp": cloud_ip,
-            "clusterIp": cluster_ip,
-            "lat": lat,
-            "lon": lon
-        }
-    })
-    
-    response = requests.request("POST", url, headers=headers, data=payload)
-    print(response)
-    if response.status_code != 202:
-        response = requests.request("PUT", url, headers=headers, data=payload)
-        print(response)
-    if response.status_code != 202:
-        # TODO handle
-        print("Deployment not successful.")
-    
-    
-    function_url = f"http://{openfaas_gateway_ip}:{openfaas_gateway_port}/function/{function_name}"
-    response = requests.request("GET", function_url)
-    print(f"Registering cluster in cloud: {response}")
+    # TODO remove
+    # url = f"http://admin:{openfaas_secret}@{openfaas_gateway_ip}:{openfaas_gateway_port}/system/functions"
+    #
+    # headers = {
+    #     'Content-Type': 'application/json'
+    # }
+    #
+    # # Deploy Function
+    # payload = json.dumps({
+    #     "service": function_name,
+    #     "network": "func_functions",
+    #     "image": registry_url,
+    #     "readOnlyRootFilesystem": True,
+    #     "envVars": {
+    #         "cloudIp": cloud_ip,
+    #         "clusterIp": cluster_ip,
+    #         "lat": lat,
+    #         "lon": lon
+    #     }
+    # })
+    #
+    # response = requests.request("POST", url, headers=headers, data=payload)
+    # print(response)
+    # if response.status_code != 202:
+    #     response = requests.request("PUT", url, headers=headers, data=payload)
+    #     print(response)
+    # if response.status_code != 202:
+    #     # TODO handle
+    #     print("Deployment not successful.")
+    #
+    #
+    # function_url = f"http://{openfaas_gateway_ip}:{openfaas_gateway_port}/function/{function_name}"
+    # response = requests.request("GET", function_url)
+    # print(f"Registering cluster in cloud: {response}")
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -73,5 +74,11 @@ for cluster in get_clusters():
         "ip": kubectl_pod_ip
     })
     print(f"Setting cluster external ip: {response}")
+
+    response = requests.request("POST", f"http://{cluster_ip}:5000/set-location", headers=headers, data={
+        "lat": lat,
+        "lon": lon
+    })
+    print(f"Setting cluster location: {response}")
 
 

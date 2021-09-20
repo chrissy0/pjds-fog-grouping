@@ -18,7 +18,10 @@ gcloud compute firewall-rules create cluster-flask --allow tcp:5000
 gcloud compute firewall-rules create kubectl-flask --allow tcp:5001
 
 # (for 2nd: `pjds-cluster-2`)
+mv ~/.kube/config ~/.kube/config.bak
 gcloud container clusters get-credentials pjds-cluster-1 --zone europe-west2-c --project pjds-fog-grouping-326209
+mv ~/.kube/config ~/.kube/config.bak
+gcloud container clusters get-credentials pjds-cluster-2 --zone europe-west2-c --project pjds-fog-grouping-326209
 
 # (just to test the setup was successful)
 kubectl get nodes
@@ -82,6 +85,8 @@ kubectl get service kubectl-service --output yaml | grep clusterIP:
 Get OpenFaas gateway IP: `kubectl get -n openfaas svc/gateway-external`
 
 SSH into kubectl-pod: `kubectl exec --stdin --tty kubectl-pod -- /bin/ash`
+
+If kubectl doesn't work, `mv ~/.kube/config ~/.kube/config.bak` and reload config using get-credentials
 
 #### Draining a node
 ```shell
