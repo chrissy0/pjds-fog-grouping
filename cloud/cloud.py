@@ -1,5 +1,7 @@
 from math import sin, cos, sqrt, atan2, radians
+import json
 
+import requests
 from flask import Flask
 from flask import jsonify
 from flask import request
@@ -95,6 +97,57 @@ def cluster_suggestions():
     return jsonify({
         "closest_clusters": clusters_incl_distance[:max_number_of_requested_clusters]
     })
+
+
+def deploy_function(target_ip, function_name, registry_url):
+    cluster = clusters[target_ip]
+    url = f"http://admin:{cluster['openfaas_secret']}@{cluster['openfaas_ip']}:8080/system/functions"
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    # Deploy Function
+    payload = json.dumps({
+        "service": function_name,
+        "network": "func_functions",
+        "image": registry_url,
+        "readOnlyRootFilesystem": True
+    })
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    if response.status_code != 202:
+        response = requests.request("PUT", url, headers=headers, data=payload)
+    if response.status_code != 202:
+        return False, function_name
+    return True, None
+
+
+@app.route('/deploy-functions', methods=['POST'])
+def deploy_functions():
+    deploy_request = request.get_json()
+    target_ip = deploy_request["ip"]
+    if target_ip not in clusters.keys():
+        return response_object(f"Target cluster is unknown, has it been registered, yet?", 409)
+    function_list = deploy_request["functions"]
+    not_deployed = []
+    for function in function_list:
+        successful, failed_function_name = deploy_function(target_ip, function["name"], function["registry_url"])
+        if not successful:
+            not_deployed.append(failed_function_name)
+    if len(not_deployed) != 0:
+        return response_object(f"The following functions were not deployed: {not_deployed}", 409)
+    return response_object("Deployed all functions.")
+
+
+@app.route('/ping', methods=['GET'])
+def ping_pong():
+    return response_object("pong")
+
+
+@app.errorhandler(Exception)
+def exception_handler(error):
+    return f"Error: {repr(error)}"
 
 
 if __name__ == '__main__':
