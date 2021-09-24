@@ -43,6 +43,8 @@ def add_to_log(message, do_print=True):
 
 
 def rebalance_resources():
+    if rebalance_locked:
+        return
     global registered
     if not registered:
         if cloud_ip is None or cluster_external_ip is None or kubectl_pod_internal_ip is None or lat is None or lon is None or openfaas_ip is None or openfaas_secret is None:
@@ -60,8 +62,6 @@ def rebalance_resources():
             registered = True
         else:
             return
-    if rebalance_locked:
-        return
 
     response = requests.get(f"http://{kubectl_pod_internal_ip}:5001/get-node-info")
     if response.status_code != 200:
@@ -108,7 +108,7 @@ def rebalance_resources():
 
     nearby_clusters_sorted_by_latency = sorted(nearby_clusters, key=lambda k: k['latency'])
     add_to_log(nearby_clusters_sorted_by_latency)
-    # TODO next: Request suggestions for nodes from nearest clusters, make decision, initialize node exchange
+
     for cluster in nearby_clusters_sorted_by_latency:
         response = requests.get(f"http://{cluster['ip']}:5000/request-node-exchange")
         add_to_log(response.text)
@@ -122,7 +122,7 @@ def rebalance_resources():
 
 
 sched = BackgroundScheduler(daemon=True)
-sched.add_job(rebalance_resources, 'interval', seconds=5)
+sched.add_job(rebalance_resources, 'interval', seconds=5)  # TODO longer interval
 sched.start()
 
 app = Flask(__name__)
@@ -158,6 +158,8 @@ def request_node():
     if response.status_code != 200:
         return response_object(f"Could not get node info from kubectl pod.", 409)
     cluster_node_info = json.loads(response.text)["node_info"]
+    if len(cluster_node_info) == 1:
+        return response_object(f"Cluster is already of size 1, cannot provide another node.", 409)
     avg_cpu_usage_after_shutting_down_another_node = sum(list(map(lambda x: float(x["cpu_percent"][:-1]), cluster_node_info))) / (len(cluster_node_info) - 1)
     if avg_cpu_usage_after_shutting_down_another_node > max_avg_cpu_usage:
         return response_object(f"Average CPU usage after removing one node exceeds {max_avg_cpu_usage}% ({avg_cpu_usage_after_shutting_down_another_node}%), thus no nodes can be offered.", 409)
