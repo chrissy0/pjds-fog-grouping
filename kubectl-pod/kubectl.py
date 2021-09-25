@@ -5,6 +5,10 @@ from flask import request
 
 app = Flask(__name__)
 
+GC_BIN = "./google-cloud-sdk/bin/gcloud"
+
+CLUSTER = "cluster-victor"
+ZONE = "europe-west1-b"
 
 def kubectl_top_nodes():
     response = os.popen("kubectl top nodes").read()
@@ -33,18 +37,43 @@ def kubectl_top_nodes():
         "message": "Could not retrieve node info" if len(response) == 0 else ""
     }
 
-def drain_node(node):
-    os.popen(f"kubectl drain {node} --ignore-daemonsets")
+def drain_delete(node):
+    node_group = node[:-4]
+    _ = os.popen(f"kubectl drain {node} --ignore-daemonsets").read() #use read() to wait for execution
+    _ = os.popen(f"{GC_BIN} compute instance-groups managed delete-instances {node_group}grp --instances={node} --zone {ZONE}").read()
+    os.popen(f"{GC_BIN} compute instances delete {node} --zone {ZONE} -q")
+    
+
+
+@app.route('/set-config', methods=['POST'])
+def set_config():
+    req = request.json
+    CLUSTER = req["cluster"]
+    ZONE = req["zone"]
+    os.popen(f"{GC_BIN} container clusters get-credentials {CLUSTER} --zone {ZONE}")
+    return "Config set"
 
 @app.route('/get-node-info', methods=['GET'])
 def get_node_info():
     return kubectl_top_nodes()
 
-@app.route('/drain-node', methods=['POST'])
-def remove_node():
-    node = request.form("node")
-    drain_node(node)
-    # Initiate adding node here?
+@app.route('/delete-node', methods=['POST'])
+def delete_node():
+    req = request.json
+    node = req["node"]
+    drain_delete(node)
+    return "Node deleted"
+
+@app.route('/add-node', methods=['GET'])
+def add_node():
+    output = os.popen(f"{GC_BIN} container node-pools list --cluster {CLUSTER} --zone {ZONE}").read().split()
+    node_pool_size = os.popen(f"{GC_BIN} container clusters describe {CLUSTER} --zone {ZONE}").read().splitlines()[16][18:]
+    node_pool_size = int(node_pool_size) + 1
+    node_pool_name = output[4]
+    os.popen(f"{GC_BIN} container clusters resize {CLUSTER} --node-pool {node_pool_name} --num-nodes {node_pool_size} --zone {ZONE} -q")
+    return "Node added"
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5001)
