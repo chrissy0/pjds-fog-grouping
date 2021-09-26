@@ -8,3 +8,24 @@ If there is an error, rerun get-credentials
 - `docker push pjdsgrouping/kubectl-pod`
 - `kubectl create -f deploy-kubectl-pod.yml`
 - `kubectl port-forward kubectl-pod 5001`
+
+## Endpoints
+
+#### POST: ```/set-config```
+
+```json
+{
+  "cluster": "<cluster-name>",
+  "zone": "<zone-name>"
+}
+```
+
+#### POST: ```/delete-node```
+
+```json
+{
+  "node": "<node-name>"
+}
+```
+
+#### GET: ```/add-node```
