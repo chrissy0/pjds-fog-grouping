@@ -21,6 +21,8 @@ rebalance_locked = False
 registered = False
 lat = None
 lon = None
+cluster_name = None
+cluster_zone = None
 
 
 def response_object(message=None, code=200):
@@ -47,7 +49,7 @@ def rebalance_resources():
         return
     global registered
     if not registered:
-        if cloud_ip is None or cluster_external_ip is None or kubectl_pod_internal_ip is None or lat is None or lon is None or openfaas_ip is None or openfaas_secret is None:
+        if cloud_ip is None or cluster_external_ip is None or kubectl_pod_internal_ip is None or lat is None or lon is None or openfaas_ip is None or openfaas_secret is None or cluster_name is None or cluster_zone is None:
             return
         data = {
             "ip": cluster_external_ip,
@@ -62,6 +64,14 @@ def rebalance_resources():
             registered = True
         else:
             return
+
+    data = {
+        "cluster": cluster_name,
+        "zone": cluster_zone
+    }
+    response = requests.post(f"http://{kubectl_pod_internal_ip}:5001/set-config", data=data)
+    if response.status_code != 200:
+        return response_object(f"Could not set kubectl config.", 409)
 
     response = requests.get(f"http://{kubectl_pod_internal_ip}:5001/get-node-info")
     if response.status_code != 200:
@@ -130,7 +140,7 @@ app = Flask(__name__)
 
 @app.route('/init-cluster', methods=['POST'])
 def init_cluster():
-    global cloud_ip, cluster_external_ip, kubectl_pod_internal_ip, openfaas_ip, openfaas_secret, lat, lon
+    global cloud_ip, cluster_external_ip, kubectl_pod_internal_ip, openfaas_ip, openfaas_secret, lat, lon, cluster_name, cluster_zone
     cloud_ip = request.form["cloud_ip"]
     cluster_external_ip = request.form["cluster_external_ip"]
     kubectl_pod_internal_ip = request.form["kubectl_pod_internal_ip"]
@@ -138,6 +148,8 @@ def init_cluster():
     openfaas_secret = request.form["openfaas_secret"]
     lat = request.form["lat"]
     lon = request.form["lon"]
+    cluster_name = request.form["cluster_name"]
+    cluster_zone = request.form["cluster_zone"]
     return response_object(f"Cluster was initialized.")
 
 

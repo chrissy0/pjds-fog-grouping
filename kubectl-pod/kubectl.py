@@ -8,8 +8,8 @@ app = Flask(__name__)
 
 GC_BIN = "./google-cloud-sdk/bin/gcloud"
 
-CLUSTER = "cluster-victor"
-ZONE = ""
+CLUSTER = None
+ZONE = None
 NODESIZE_KEY = "currentNodeCount: "
 
 def kubectl_top_nodes():
@@ -39,11 +39,13 @@ def kubectl_top_nodes():
         "message": "Could not retrieve node info" if len(response) == 0 else ""
     }
 
+
 def drain_delete(node):
     node_group = node[:-4]
-    _ = os.popen(f"kubectl drain {node} --ignore-daemonsets").read() #use read() to wait for execution
+    _ = os.popen(f"kubectl drain {node} --ignore-daemonsets").read()  # use read() to wait for execution
     _ = os.popen(f"{GC_BIN} compute instance-groups managed delete-instances {node_group}grp --instances={node} --zone {ZONE}").read()
     os.popen(f"{GC_BIN} compute instances delete {node} --zone {ZONE} -q")
+
 
 def extract_nodepool_size(output):
     start = output.find(NODESIZE_KEY) + len(NODESIZE_KEY)
@@ -64,9 +66,11 @@ def set_config():
     os.popen(f"{GC_BIN} container clusters get-credentials {CLUSTER} --zone {ZONE}")
     return f"Cluster: {CLUSTER} and Zone: {ZONE} set"
 
+
 @app.route('/get-node-info', methods=['GET'])
 def get_node_info():
     return kubectl_top_nodes()
+
 
 @app.route('/delete-node', methods=['POST'])
 def delete_node():
@@ -74,6 +78,7 @@ def delete_node():
     node = req["node"]
     drain_delete(node)
     return "Node deleted"
+
 
 @app.route('/add-node', methods=['GET'])
 def add_node():

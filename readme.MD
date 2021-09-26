@@ -52,7 +52,7 @@ docker build -t cluster-app .
 docker tag cluster-app pjdsgrouping/cluster-app
 docker push pjdsgrouping/cluster-app
 kubectl delete pod cluster-app-pod
-kubectl create -f deploy-cluster.yml
+kubectl create -f cluster-deployment.yml
 kubectl apply -f cluster-service.yml
 cd ..
 # get public ip:
@@ -73,10 +73,12 @@ docker build -t kubectl-pod .
 docker tag kubectl-pod pjdsgrouping/kubectl-pod
 docker push pjdsgrouping/kubectl-pod
 kubectl delete pod kubectl-pod
-kubectl create -f deploy-kubectl-pod.yml
+kubectl create -f kubectl-pod-deployment.yml
 
 # setup service to access kubectl-pod:
 kubectl apply -f kubectl-service.yml
+# TODO Execute the following only if kubectl needs to be accessible from the outside
+kubectl apply -f kubectl-service-public.yml
 cd ..
 # later: kubectl port-forward kubectl-pod 5001
 # get static ip of kubectl-pod

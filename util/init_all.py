@@ -20,6 +20,9 @@ for cluster in get_clusters():
     cluster_ip = cluster["cluster_ip"]
     kubectl_pod_ip = cluster["kubectl_pod_ip"]
 
+    cluster_name = cluster["cluster_name"]
+    cluster_zone = cluster["zone"]
+
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -32,7 +35,9 @@ for cluster in get_clusters():
         "openfaas_ip": openfaas_ip,
         "openfaas_secret": openfaas_secret,
         "lat": lat,
-        "lon": lon
+        "lon": lon,
+        "cluster_name": cluster_name,
+        "cluster_zone": cluster_zone
     })
     print(f"Initializing cluster: {response}")
 

@@ -11,6 +11,8 @@ cluster_list = [
         "secret": "F5sV631qQJCSeKSTY22oD5840",  # echo $(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
         "lat": "52.3454",
         "lon": "13.645",
+        "cluster_name": "pjds-cluster-1",
+        "zone": "europe-west2-c",
     },
     # {
     #     "name": "pjds-cluster-2",
@@ -20,6 +22,8 @@ cluster_list = [
     #     "secret": "guD0459ZLc2dpym4xL7Sh7O47",
     #     "lat": "40.32444223",
     #     "lon": "16.87498",
+    #     "cluster_name": "abc",
+    #     "zone": "def",
     # },
 ]
 
