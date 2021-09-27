@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: kubectl-service
+  name: kubectl-gcloud-service
 spec:
   type: ClusterIP
   selector:
-    app: kubectl-pod
+    app: kubectl-gcloud-pod
   ports:
   - protocol: TCP
     port: 5001

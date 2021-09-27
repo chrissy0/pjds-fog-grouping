@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-   name: kubectl-pod
+   name: kubectl-gcloud-pod
    labels:
-     app: kubectl-pod
+     app: kubectl-gcloud-pod
 spec:
    replicas: 1
    selector:
       matchLabels:
-         app: kubectl-pod
+         app: kubectl-gcloud-pod
    template:
       metadata:
          labels:
-           app: kubectl-pod
+           app: kubectl-gcloud-pod
       spec:
          containers:
-         - name: kubectl-pod
+         - name: kubectl-gcloud-pod
            image: pjdsgrouping/kubectl-gcloud-pod:latest
            env:
            - name: cluster
