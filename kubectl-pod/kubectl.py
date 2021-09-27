@@ -7,8 +7,9 @@ app = Flask(__name__)
 
 GC_BIN = "./google-cloud-sdk/bin/gcloud"
 
-CLUSTER = "cluster-victor"
-ZONE = "europe-west1-b"
+CLUSTER = ""
+ZONE = ""
+NODESIZE_KEY = "currentNodeCount: "
 
 def kubectl_top_nodes():
     response = os.popen("kubectl top nodes").read()
@@ -42,16 +43,26 @@ def drain_delete(node):
     _ = os.popen(f"kubectl drain {node} --ignore-daemonsets").read() #use read() to wait for execution
     _ = os.popen(f"{GC_BIN} compute instance-groups managed delete-instances {node_group}grp --instances={node} --zone {ZONE}").read()
     os.popen(f"{GC_BIN} compute instances delete {node} --zone {ZONE} -q")
-    
+
+def extract_nodepool_size(output):
+    start = output.find(NODESIZE_KEY) + len(NODESIZE_KEY)
+    end = start + 1
+    while output[end].isnumeric():
+        end = end + 1
+    nodepool_size = int(output[start:end]) + 1
+    return nodepool_size
+
 
 
 @app.route('/set-config', methods=['POST'])
 def set_config():
+    global CLUSTER
+    global ZONE
     req = request.json
     CLUSTER = req["cluster"]
     ZONE = req["zone"]
     os.popen(f"{GC_BIN} container clusters get-credentials {CLUSTER} --zone {ZONE}")
-    return "Config set"
+    return f"Cluster: {CLUSTER} and Zone: {ZONE} set"
 
 @app.route('/get-node-info', methods=['GET'])
 def get_node_info():
@@ -67,12 +78,11 @@ def delete_node():
 @app.route('/add-node', methods=['GET'])
 def add_node():
     output = os.popen(f"{GC_BIN} container node-pools list --cluster {CLUSTER} --zone {ZONE}").read().split()
-    node_pool_size = os.popen(f"{GC_BIN} container clusters describe {CLUSTER} --zone {ZONE}").read().splitlines()[16][18:]
-    node_pool_size = int(node_pool_size) + 1
-    node_pool_name = output[4]
+    node_pool_name = output[4] # Take the first node-pool (Assume we only use one per cluster anyway)
+    output = os.popen(f"{GC_BIN} container clusters describe {CLUSTER} --zone {ZONE}").read()
+    node_pool_size = extract_nodepool_size(output)
     os.popen(f"{GC_BIN} container clusters resize {CLUSTER} --node-pool {node_pool_name} --num-nodes {node_pool_size} --zone {ZONE} -q")
     return "Node added"
-
 
 
 if __name__ == '__main__':
