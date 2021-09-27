@@ -51,7 +51,13 @@ cd cluster
 docker build -t cluster-app .
 docker tag cluster-app pjdsgrouping/cluster-app
 docker push pjdsgrouping/cluster-app
-kubectl delete pod cluster-app-pod
+kubectl delete -n default deployment cluster-app
+
+
+# WAIT
+
+
+#kubectl delete pod cluster-app-pod
 kubectl create -f cluster-deployment.yml
 kubectl apply -f cluster-service.yml
 cd ..
@@ -72,7 +78,14 @@ sudo chown 1001 config
 docker build -t kubectl-pod .
 docker tag kubectl-pod pjdsgrouping/kubectl-pod
 docker push pjdsgrouping/kubectl-pod
-kubectl delete pod kubectl-pod
+kubectl delete -n default deployment kubectl-pod
+
+
+# WAIT
+
+
+
+#kubectl delete pod kubectl-pod
 kubectl create -f kubectl-pod-deployment.yml
 
 # setup service to access kubectl-pod:
@@ -89,6 +102,8 @@ Get OpenFaas gateway IP: `kubectl get -n openfaas svc/gateway-external`
 SSH into kubectl-pod: `kubectl exec --stdin --tty kubectl-pod -- /bin/ash`
 
 If kubectl doesn't work, `mv ~/.kube/config ~/.kube/config.bak` and reload config using get-credentials
+
+Get deployments: `kubectl get deployments --all-namespaces`
 
 #### Draining a node
 ```shell

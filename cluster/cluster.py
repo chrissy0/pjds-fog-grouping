@@ -124,7 +124,7 @@ def rebalance_resources():
         add_to_log(response.text)
         if response.status_code != 200:
             add_to_log(f"Could not agree on exchanging nodes with node @{cluster['ip']}")
-            return
+            continue
         add_to_log(f"Adding new node, while {cluster['ip']} shuts down a node.")
         # TODO add new node now
         # TODO don't ask for new nodes again before new node is fully added
