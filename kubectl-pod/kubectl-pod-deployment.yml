@@ -19,8 +19,8 @@ spec:
            image: pjdsgrouping/kubectl-gcloud-pod:latest
            env:
            - name: cluster
-             value: "cluster-victor"
+             value: <CLUSTER>
            - name: zone
-             value: "europe-west1-c"
+             value: <ZONE>
            ports:
            - containerPort: 5001
