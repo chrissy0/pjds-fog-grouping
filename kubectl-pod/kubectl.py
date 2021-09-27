@@ -1,4 +1,5 @@
 import os
+import sys
 
 from flask import Flask
 from flask import request
@@ -7,7 +8,7 @@ app = Flask(__name__)
 
 GC_BIN = "./google-cloud-sdk/bin/gcloud"
 
-CLUSTER = ""
+CLUSTER = "cluster-victor"
 ZONE = ""
 NODESIZE_KEY = "currentNodeCount: "
 
@@ -53,7 +54,6 @@ def extract_nodepool_size(output):
     return nodepool_size
 
 
-
 @app.route('/set-config', methods=['POST'])
 def set_config():
     global CLUSTER
@@ -77,7 +77,7 @@ def delete_node():
 
 @app.route('/add-node', methods=['GET'])
 def add_node():
-    output = os.popen(f"{GC_BIN} container node-pools list --cluster {CLUSTER} --zone {ZONE}").read().split()
+    output = os.popen(f"{GC_BIN} container node-pools list --cluster {CLUSTER}").read().split()
     node_pool_name = output[4] # Take the first node-pool (Assume we only use one per cluster anyway)
     output = os.popen(f"{GC_BIN} container clusters describe {CLUSTER} --zone {ZONE}").read()
     node_pool_size = extract_nodepool_size(output)
@@ -86,4 +86,8 @@ def add_node():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) == 3:
+        args = sys.argv
+        CLUSTER = args[1]
+        ZONE = args[2]
     app.run(host="0.0.0.0", port=5001)

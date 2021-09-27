@@ -16,6 +16,11 @@ spec:
       spec:
          containers:
          - name: kubectl-pod
-           image: pjdsgrouping/kubectl-pod:latest
+           image: pjdsgrouping/kubectl-gcloud-pod:latest
+           env:
+           - name: cluster
+             value: "cluster-victor"
+           - name: zone
+             value: "europe-west1-c"
            ports:
            - containerPort: 5001
