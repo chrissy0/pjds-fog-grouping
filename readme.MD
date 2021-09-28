@@ -54,7 +54,7 @@ docker push pjdsgrouping/cluster-app
 kubectl delete -n default deployment cluster-app
 
 
-# WAIT
+# WAIT until pod is gone
 
 
 #kubectl delete pod cluster-app-pod
@@ -68,25 +68,27 @@ kubectl port-forward cluster-app-pod 5000
 
 # kubectl-pod
 cd kubectl-pod
-cp ~/.kube/config config
-# The next part is for some reason only necessary sometimes? If it doesn't work, replace `1001` by `$UID`
-sudo chown 1001 config
+#cp ~/.kube/config config
+## The next part is for some reason only necessary sometimes? If it doesn't work, replace `1001` by `$UID`
+#sudo chown 1001 config
 # If there is an error, try get-credentials again
 #cp -r /usr/lib/google-cloud-sdk/bin/ bin
 #sudo chown 1001 bin/
 
-docker build -t kubectl-pod .
-docker tag kubectl-pod pjdsgrouping/kubectl-pod
-docker push pjdsgrouping/kubectl-pod
-kubectl delete -n default deployment kubectl-pod
+docker build -t kubectl-gcloud-pod .
+docker tag kubectl-gcloud-pod pjdsgrouping/kubectl-gcloud-pod
+docker push pjdsgrouping/kubectl-gcloud-pod
+kubectl delete -n default deployment kubectl-pod  # TODO probably no longer necessary
+kubectl delete -n default deployment kubectl-gcloud-pod
 
 
-# WAIT
+# WAIT until pod is gone
 
 
 
 #kubectl delete pod kubectl-pod
-kubectl create -f kubectl-pod-deployment.yml
+#kubectl create -f kubectl-pod-deployment.yml
+./deploy-pod.sh pjds-cluster-1 europe-west2-c
 
 # setup service to access kubectl-pod:
 kubectl apply -f kubectl-service.yml

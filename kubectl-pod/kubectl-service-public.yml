@@ -5,7 +5,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: kubectl-pod
+    app: kubectl-gcloud-pod
   ports:
   - protocol: TCP
     port: 5002

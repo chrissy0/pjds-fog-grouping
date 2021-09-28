@@ -9,3 +9,5 @@
     - destroy_network
     - destroy_k8s2
     - destroy_network2
+#    - destroy_k8s3
+#    - destroy_network3

@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from timeit import default_timer as timer
 import numpy as np
 
@@ -16,17 +16,19 @@ cluster_external_ip = None
 kubectl_pod_internal_ip = None
 openfaas_ip = None
 openfaas_secret = None
-max_avg_cpu_usage = 0  # TODO change
+max_avg_cpu_usage = 50  # TODO change
 rebalance_locked = False
+unlock_time = datetime.now()
 registered = False
 lat = None
 lon = None
-cluster_name = None
-cluster_zone = None
+cluster_name = None  # TODO remove
+cluster_zone = None  # TODO remove
 
 
 def response_object(message=None, code=200):
     res = {}
+    print(f"[{code}][{message}]")
     if message:
         add_to_log(message)
         res["message"] = message
@@ -45,8 +47,12 @@ def add_to_log(message, do_print=True):
 
 
 def rebalance_resources():
+    global rebalance_locked, unlock_time
     if rebalance_locked:
-        return
+        if datetime.now() > unlock_time:  # TODO switch to non-time based locking mechanism?
+            rebalance_locked = False
+        else:
+            return
     global registered
     if not registered:
         if cloud_ip is None or cluster_external_ip is None or kubectl_pod_internal_ip is None or lat is None or lon is None or openfaas_ip is None or openfaas_secret is None or cluster_name is None or cluster_zone is None:
@@ -65,13 +71,6 @@ def rebalance_resources():
         else:
             return
 
-    data = {
-        "cluster": cluster_name,
-        "zone": cluster_zone
-    }
-    response = requests.post(f"http://{kubectl_pod_internal_ip}:5001/set-config", data=data)
-    if response.status_code != 200:
-        return response_object(f"Could not set kubectl config.", 409)
 
     response = requests.get(f"http://{kubectl_pod_internal_ip}:5001/get-node-info")
     if response.status_code != 200:
@@ -125,9 +124,14 @@ def rebalance_resources():
         if response.status_code != 200:
             add_to_log(f"Could not agree on exchanging nodes with node @{cluster['ip']}")
             continue
+
+        # actually adding node
         add_to_log(f"Adding new node, while {cluster['ip']} shuts down a node.")
-        # TODO add new node now
-        # TODO don't ask for new nodes again before new node is fully added
+        response = requests.get(f"http://{kubectl_pod_internal_ip}:5001/add-node")
+        if response.status_code != 200:
+            return response_object(f"Could not add new node.", 409)
+        rebalance_locked = True
+        unlock_time = datetime.now() + timedelta(minutes=1)
         return
 
 
@@ -161,6 +165,7 @@ def get_error_log():
 
 @app.route('/request-node-exchange', methods=['GET'])
 def request_node():
+    global rebalance_locked, unlock_time
     if rebalance_locked:
         return response_object("Rebalancing is currently disabled for this cluster.", 409)
     global kubectl_pod_internal_ip
@@ -175,7 +180,17 @@ def request_node():
     avg_cpu_usage_after_shutting_down_another_node = sum(list(map(lambda x: float(x["cpu_percent"][:-1]), cluster_node_info))) / (len(cluster_node_info) - 1)
     if avg_cpu_usage_after_shutting_down_another_node > max_avg_cpu_usage:
         return response_object(f"Average CPU usage after removing one node exceeds {max_avg_cpu_usage}% ({avg_cpu_usage_after_shutting_down_another_node}%), thus no nodes can be offered.", 409)
-    # TODO shutdown node
+
+    # actually shutdown node
+    node_to_be_shutdown = cluster_node_info[0]["name"]
+    data = {
+        "node": node_to_be_shutdown
+    }
+    response = requests.post(f"http://{kubectl_pod_internal_ip}:5001/delete-node", data=data)
+    if response.status_code != 200:
+        return response_object(f"Could not shutdown node.", 409)
+    rebalance_locked = True
+    unlock_time = datetime.now() + timedelta(minutes=3)
     return response_object("Node will be shutdown.", 200)
 
 

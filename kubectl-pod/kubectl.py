@@ -12,6 +12,7 @@ CLUSTER = None
 ZONE = None
 NODESIZE_KEY = "currentNodeCount: "
 
+
 def kubectl_top_nodes():
     response = os.popen("kubectl top nodes").read()
 
@@ -60,9 +61,8 @@ def extract_nodepool_size(output):
 def set_config():
     global CLUSTER
     global ZONE
-    req = request.json
-    CLUSTER = req["cluster"]
-    ZONE = req["zone"]
+    CLUSTER = request.form["cluster"]
+    ZONE = request.form["zone"]
     os.popen(f"{GC_BIN} container clusters get-credentials {CLUSTER} --zone {ZONE}")
     return f"Cluster: {CLUSTER} and Zone: {ZONE} set"
 
@@ -74,8 +74,7 @@ def get_node_info():
 
 @app.route('/delete-node', methods=['POST'])
 def delete_node():
-    req = request.json
-    node = req["node"]
+    node = request.form["node"]
     drain_delete(node)
     return "Node deleted"
 
@@ -83,7 +82,7 @@ def delete_node():
 @app.route('/add-node', methods=['GET'])
 def add_node():
     output = os.popen(f"{GC_BIN} container node-pools list --cluster {CLUSTER}").read().split()
-    node_pool_name = output[4] # Take the first node-pool (Assume we only use one per cluster anyway)
+    node_pool_name = output[4]  # Take the first node-pool (Assume we only use one per cluster anyway)
     output = os.popen(f"{GC_BIN} container clusters describe {CLUSTER} --zone {ZONE}").read()
     node_pool_size = extract_nodepool_size(output)
     os.popen(f"{GC_BIN} container clusters resize {CLUSTER} --node-pool {node_pool_name} --num-nodes {node_pool_size} --zone {ZONE} -q")
