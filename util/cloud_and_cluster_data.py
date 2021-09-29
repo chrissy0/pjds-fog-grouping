@@ -1,5 +1,5 @@
 cloud = {
-    "ip": "34.141.127.189"
+    "ip": "<placeholder>"
 }
 
 
