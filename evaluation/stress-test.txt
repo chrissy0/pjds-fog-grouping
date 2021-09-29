@@ -1,1 +1,1 @@
-hey -n 200 -c 50 -m GET http://35.246.29.50:8080/function/ping-pong
+hey -n 40000 -c 500 -m GET -o csv http://34.142.127.185:8080/function/ping-pong > measurement.csv

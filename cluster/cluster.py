@@ -158,7 +158,7 @@ def init_cluster():
 
 
 @app.route('/get-log', methods=['GET'])
-def get_error_log():
+def get_log():
     global log
     return jsonify(results=log)
 
