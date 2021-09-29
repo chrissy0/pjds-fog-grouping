@@ -124,7 +124,7 @@ POST http://<cloud_ip>:5000/deploy-functions"
     "functions": [
         {
             "name": "first_function_name",
-            "registry_url": "<docker_hub_registry_url>"  # ex.: pjdsgrouping/ping-pong
+            "registry_url": "<docker_hub_registry_url>"
         },
         {
             "name": "second_function_name",
@@ -133,6 +133,7 @@ POST http://<cloud_ip>:5000/deploy-functions"
     ]
 }
 ```
+_Example registry URL:_ `pjdsgrouping/ping-pong`
 
 All functions will subsequently be deployed. A sample deployment script can be found at `/util/batch_deploy_functions.py`.
 
