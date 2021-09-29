@@ -26,7 +26,8 @@ A centralised management of the fog network would yield the most efficient resou
 To achieve both, low latency at the edge and high availability, we use a hybrid solution with groups composed of Kubernetes clusters that communicate to exchange nodes. Kubernetes has already proven to reach efficient resource allocation and fault tolerance within a cluster. To mitigate the problem of pending pods, and thus increase availability, the clusters can exchange nodes to gain more resources. New nodes will be chosen decentralized among the clusters based on latency and the current load. 
 
 ## 🚀 Future Scope <a name = "future_scope"></a>
-@berit add here
+To further decrease latency of requests, the Kubernetes scheduler can be extended with network-aware properties for within the cluster and not only consider CPU and RAM usage. 
+Additional scalability can be achieved with a decentralized control plane. Thus, substituting the cloud instance with a cluster enhances availability of the approach. Finally, we evaluated our approach with a small cluster setting and only virtual resources. Therefore the approach should be tested in a large and geo-distributed network with virtual and physical devices.
 
 ## 🏁 Deployment & Configuration <a name = "deployment_config"></a>
 These instructions will get the project up and running.
