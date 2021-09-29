@@ -1,7 +1,5 @@
 FROM python:3.9-slim-buster
 ADD cluster.py /
-#COPY . /app # TODO remove these 2 lines?
-#WORKDIR /app
 RUN pip3 install Flask
 RUN pip3 install apscheduler
 RUN pip3 install requests

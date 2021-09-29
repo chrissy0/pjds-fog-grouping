@@ -16,14 +16,14 @@ cluster_external_ip = None
 kubectl_pod_internal_ip = None
 openfaas_ip = None
 openfaas_secret = None
-max_avg_cpu_usage = 50  # TODO change
+max_avg_cpu_usage = 50
 rebalance_locked = False
 unlock_time = datetime.now()
 registered = False
 lat = None
 lon = None
-cluster_name = None  # TODO remove
-cluster_zone = None  # TODO remove
+cluster_name = None
+cluster_zone = None
 
 
 def response_object(message=None, code=200):
@@ -49,7 +49,7 @@ def add_to_log(message, do_print=True):
 def rebalance_resources():
     global rebalance_locked, unlock_time
     if rebalance_locked:
-        if datetime.now() > unlock_time:  # TODO switch to non-time based locking mechanism?
+        if datetime.now() > unlock_time:
             rebalance_locked = False
         else:
             return
@@ -77,7 +77,6 @@ def rebalance_resources():
         return response_object(f"Could not get node info from kubectl pod.", 409)
     cluster_node_info = json.loads(response.text)["node_info"]
     if len(cluster_node_info) == 0:
-        # TODO more stuff to do here?
         return
     add_to_log(f"Got cluster node info: {cluster_node_info}")
     avg_cpu_usage = np.average(list(map(lambda x: float(x["cpu_percent"][:-1]), cluster_node_info)))
@@ -108,7 +107,6 @@ def rebalance_resources():
             response = requests.get(f"http://{ip}:5000/ping")
             end_time = timer()
             if response.status_code != 200:
-                # TODO unexpected response, handle
                 pass
             roundtrip_latency = end_time - start_time
             # keeping lowest measured latency
@@ -136,7 +134,7 @@ def rebalance_resources():
 
 
 sched = BackgroundScheduler(daemon=True)
-sched.add_job(rebalance_resources, 'interval', seconds=5)  # TODO longer interval
+sched.add_job(rebalance_resources, 'interval', seconds=10)
 sched.start()
 
 app = Flask(__name__)

@@ -77,7 +77,6 @@ for group_mode in group_modes:
 
                 print(f"#{i+1}")
                 start = timer()
-                # TODO check more carefully if the call was successful. Returned True even though execution time limit was not set.
                 successful, response = call_fn("evaluation-function-01", data, log=True)
                 end = timer()
                 print(end - start)

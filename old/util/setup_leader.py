@@ -44,5 +44,3 @@ def setup_leader():
 
 if __name__ == "__main__":
     setup_leader()
-
-# TODO set leader IP on nodes
