@@ -27,7 +27,8 @@ To achieve both, low latency at the edge and high availability, we use a hybrid 
 
 ## 🚀 Future Scope <a name = "future_scope"></a>
 To further decrease latency of requests, the Kubernetes scheduler can be extended with network-aware properties for within the cluster and not only consider CPU and RAM usage. 
-Additional scalability can be achieved with a decentralized control plane. Thus, substituting the cloud instance with a cluster enhances availability of the approach. Finally, we evaluated our approach with a small cluster setting and only virtual resources. Therefore the approach should be tested in a large and geo-distributed network with virtual and physical devices.
+Additional scalability can be achieved with a decentralized control plane. Thus, substituting the cloud instance with a cluster enhances availability of the approach. Finally, we evaluated our approach with a small cluster setting and only virtual resources. Therefore the approach should be tested in a large and geo-distributed network with virtual and physical devices. 
+Another step would be going a middle way between the initial approach - using faasd in combination with no clustering - and the final approach with a fully fledged OpenFaaS and Kubernetes implementation. One such tool could be K3s, a lightweight Kubernetes distribution built to be run on IoT and Edge devices. This could further reduce CPU and memory consumption bringing it closer to the initial faasd idea while also providing all the benefits that come from using clusters. 
 
 ## 🏁 Deployment & Configuration <a name = "deployment_config"></a>
 These instructions will get the project up and running.
